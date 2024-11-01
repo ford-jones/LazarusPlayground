@@ -1,5 +1,5 @@
 # Lazarus Playground 
-A test demo showcasing the features of [Lazarus Engine](https://github.com/ford-jones/Lazarus).
+A test demo showcasing the features of Lazarus.
 
 ## Getting Started:
 1. Clone down the [Lazarus repo](https://github.com/ford-jones/Lazarus)
