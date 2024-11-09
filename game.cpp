@@ -184,7 +184,7 @@ void Game::start()
         int word1 = textManager->loadText("Lazarus Engine", ((globals.getDisplayWidth() / 2) - 350), 80, 10, 0.6f, 0.0f, 0.0f);
         textManager->drawText(word1);
 
-        std::string fps = std::string("FPS: ").append(std::to_string(static_cast<int>(fpsCounter.framesPerSecond)));
+        std::string fps = std::string("Rotation X: ").append(std::to_string(turnX));
         int word2 = textManager->loadText(fps, 50, 50, 5, 1.0f, 1.0f, 0.9f);
         textManager->drawText(word2);
 
@@ -239,4 +239,9 @@ void Game::keyCapture(string key)
 			moveX = 0.0;
 			moveZ = 0.0;
 		};
+
+        if(turnX > 360.0f || turnX < -360)
+        {
+            turnX = 0;
+        };
 };
