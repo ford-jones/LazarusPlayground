@@ -51,9 +51,9 @@ class Game
         shared_ptr<Lazarus::Camera::FixedCamera> camera;
         shared_ptr<Lazarus::Light::AmbientLight> light;
 
-        shared_ptr<Lazarus::Mesh::TriangulatedMesh> spiderweb;
-        shared_ptr<Lazarus::Mesh::TriangulatedMesh> skull;
-        shared_ptr<Lazarus::Mesh::TriangulatedMesh> walls;
-        shared_ptr<Lazarus::Mesh::TriangulatedMesh> floors;
-        shared_ptr<Lazarus::Mesh::TriangulatedMesh> sword;
+        Lazarus::Mesh::TriangulatedMesh spiderweb;
+        Lazarus::Mesh::TriangulatedMesh skull;
+        Lazarus::Mesh::TriangulatedMesh walls;
+        Lazarus::Mesh::TriangulatedMesh floors;
+        Lazarus::Mesh::TriangulatedMesh sword;
 };

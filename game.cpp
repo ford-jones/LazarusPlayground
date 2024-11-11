@@ -4,11 +4,6 @@ Game::Game()
 {
     soundManager = std::make_unique<Lazarus::SoundManager>();
     window = nullptr;
-    spiderweb = nullptr;
-    skull = nullptr;
-    walls = nullptr;
-    floors = nullptr;
-    sword = nullptr;
     springWaltz = nullptr;
     footstep = nullptr;
     textManager = nullptr;
@@ -37,7 +32,7 @@ void Game::init()
     cameraBuilder       = std::make_unique<Lazarus::Camera>(shaderProgram);
 
     light               = lightBuilder->createAmbientLight(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
-    camera              = cameraBuilder->createPerspectiveCam(globals.getDisplayWidth(), globals.getDisplayHeight(), 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    camera              = cameraBuilder->createPerspectiveCam(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
 
     this->setupAudio();
     this->loadScene();
@@ -101,8 +96,8 @@ void Game::start()
         {
             cameraBuilder->loadCamera(camera);
 
-            transformer.translateCameraAsset(camera, (moveX / 10), 0.0, (moveZ / 10));
             transformer.rotateCameraAsset(camera, turnX, turnY, 0.0);
+            transformer.translateCameraAsset(camera, (moveX / 10), 0.0, (moveZ / 10));
 
             soundManager->updateListenerLocation(camera->locationX, camera->locationY, camera->locationZ);
         }
@@ -112,7 +107,7 @@ void Game::start()
         };
 
         /*spiderweb*/
-        if( spiderweb->modelviewUniformLocation >= 0)
+        if( spiderweb.modelviewUniformLocation >= 0)
         {
             spiderwebBuilder->initialiseMesh(spiderweb);
 
@@ -125,7 +120,7 @@ void Game::start()
         };
 
         /*skull*/
-        if( skull->modelviewUniformLocation >= 0)
+        if( skull.modelviewUniformLocation >= 0)
         {
             skullBuilder->initialiseMesh(skull);
 
@@ -138,7 +133,7 @@ void Game::start()
         };
 
         /*sword*/
-        if( sword->modelviewUniformLocation >= 0)
+        if( sword.modelviewUniformLocation >= 0)
         {
             swordBuilder->initialiseMesh(sword);
 
@@ -155,7 +150,7 @@ void Game::start()
         };
 
         /*floors*/
-        if( floors->modelviewUniformLocation >= 0)
+        if( floors.modelviewUniformLocation >= 0)
         {
             floorsBuilder->initialiseMesh(floors);
 
@@ -168,7 +163,7 @@ void Game::start()
         };
 
         /*walls*/
-        if( walls->modelviewUniformLocation >= 0)
+        if( walls.modelviewUniformLocation >= 0)
         {
             wallsBuilder->initialiseMesh(walls);
 
@@ -181,10 +176,11 @@ void Game::start()
         };
 
         /*text*/
-        int word1 = textManager->loadText("Lazarus Engine", ((globals.getDisplayWidth() / 2) - 350), 80, 10, 0.6f, 0.0f, 0.0f);
+        int word1 = textManager->loadText("Lazarus Engine", ((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80), 10, 0.6f, 0.0f, 0.0f);
         textManager->drawText(word1);
 
-        std::string fps = std::string("Rotation X: ").append(std::to_string(turnX));
+        std::string fps = std::string("FPS: ").append(std::to_string(static_cast<int>(fpsCounter.framesPerSecond)));
+
         int word2 = textManager->loadText(fps, 50, 50, 5, 1.0f, 1.0f, 0.9f);
         textManager->drawText(word2);
 
