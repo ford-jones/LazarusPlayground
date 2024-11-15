@@ -48,8 +48,8 @@ class Game
         shared_ptr<Lazarus::SoundManager::Audio> springWaltz;
         shared_ptr<Lazarus::SoundManager::Audio> footstep;
 
-        shared_ptr<Lazarus::Camera::FixedCamera> camera;
-        shared_ptr<Lazarus::Light::AmbientLight> light;
+        Lazarus::Camera::FixedCamera camera;
+        Lazarus::Light::AmbientLight light;
 
         Lazarus::Mesh::TriangulatedMesh spiderweb;
         Lazarus::Mesh::TriangulatedMesh skull;

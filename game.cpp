@@ -92,49 +92,26 @@ void Game::start()
         transformer.translateLightAsset(light, (moveX / 10), 0.0, (moveZ / 10));
 
 		/*Camera*/
-        if( camera->projectionLocation >= 0 )
-        {
             cameraBuilder->loadCamera(camera);
 
             transformer.rotateCameraAsset(camera, turnX, turnY, 0.0);
             transformer.translateCameraAsset(camera, (moveX / 10), 0.0, (moveZ / 10));
 
-            soundManager->updateListenerLocation(camera->locationX, camera->locationY, camera->locationZ);
-        }
-        else
-        {
-            std::cout << RED_TEXT << "ERROR::SHADER::VERT::MATRICE::PROJECTION" << RESET_TEXT << std::endl;
-        };
+            soundManager->updateListenerLocation(camera.locationX, camera.locationY, camera.locationZ);
 
         /*spiderweb*/
-        if( spiderweb.modelviewUniformLocation >= 0)
-        {
             spiderwebBuilder->initialiseMesh(spiderweb);
 
             spiderwebBuilder->loadMesh(spiderweb);
             spiderwebBuilder->drawMesh(spiderweb);
-        }
-        else
-        {
-            std::cout << RED_TEXT << "ERROR::SHADER::VERT::MATRICE::MODELVIEW" << RESET_TEXT << std::endl;
-        };
 
         /*skull*/
-        if( skull.modelviewUniformLocation >= 0)
-        {
             skullBuilder->initialiseMesh(skull);
 
             skullBuilder->loadMesh(skull);
             skullBuilder->drawMesh(skull);
-        }
-        else
-        {
-            std::cout << RED_TEXT << "ERROR::SHADER::VERT::MATRICE::MODELVIEW" << RESET_TEXT << std::endl;
-        };
 
         /*sword*/
-        if( sword.modelviewUniformLocation >= 0)
-        {
             swordBuilder->initialiseMesh(sword);
 
             swordBuilder->loadMesh(sword);
@@ -143,46 +120,26 @@ void Game::start()
             transformer.translateMeshAsset(sword, (0.5 / 10), 0.0, 0.0);
             transformer.rotateMeshAsset(sword, 0.0, 1.0, 0.0);
 
-        }
-        else
-        {
-            std::cout << RED_TEXT << "ERROR::SHADER::VERT::MATRICE::MODELVIEW" << RESET_TEXT << std::endl;
-        };
-
         /*floors*/
-        if( floors.modelviewUniformLocation >= 0)
-        {
             floorsBuilder->initialiseMesh(floors);
 
             floorsBuilder->loadMesh(floors);
             floorsBuilder->drawMesh(floors);
-        }
-        else
-        {
-            std::cout << RED_TEXT << "ERROR::SHADER::VERT::MATRICE::MODELVIEW" << RESET_TEXT << std::endl;
-        };
 
         /*walls*/
-        if( walls.modelviewUniformLocation >= 0)
-        {
             wallsBuilder->initialiseMesh(walls);
 
             wallsBuilder->loadMesh(walls);
             wallsBuilder->drawMesh(walls);
-        }
-        else
-        {
-            std::cout << RED_TEXT << "ERROR::SHADER::VERT::MATRICE::MODELVIEW" << RESET_TEXT << std::endl;
-        };
 
         /*text*/
-        int word1 = textManager->loadText("Lazarus Engine", ((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80), 10, 0.6f, 0.0f, 0.0f);
-        textManager->drawText(word1);
+            int word1 = textManager->loadText("Lazarus Engine", ((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80), 10, 0.6f, 0.0f, 0.0f);
+            textManager->drawText(word1);
 
-        std::string fps = std::string("FPS: ").append(std::to_string(static_cast<int>(fpsCounter.framesPerSecond)));
+            std::string fps = std::string("FPS: ").append(std::to_string(static_cast<int>(fpsCounter.framesPerSecond)));
 
-        int word2 = textManager->loadText(fps, 50, 50, 5, 1.0f, 1.0f, 0.9f);
-        textManager->drawText(word2);
+            int word2 = textManager->loadText(fps, 50, 50, 5, 1.0f, 1.0f, 0.9f);
+            textManager->drawText(word2);
 
         window->handleBuffers();
 
