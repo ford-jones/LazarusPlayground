@@ -1,4 +1,4 @@
-#include <lazarus.h>
+#include <lz.h>
 #include <string>
 #include <memory>
 
@@ -34,26 +34,24 @@ class Game
         Lazarus::FpsCounter fpsCounter;
 
         unique_ptr<Lazarus::WindowManager> window;
-        unique_ptr<Lazarus::SoundManager> soundManager;
+        unique_ptr<Lazarus::AudioManager> soundManager;
         unique_ptr<Lazarus::TextManager> textManager;
-        unique_ptr<Lazarus::Camera> cameraBuilder;
-        unique_ptr<Lazarus::Light> lightBuilder;
+        unique_ptr<Lazarus::CameraManager> cameraBuilder;
+        unique_ptr<Lazarus::LightManager> lightBuilder;
 
-        unique_ptr<Lazarus::Mesh> spiderwebBuilder;
-        unique_ptr<Lazarus::Mesh> wallsBuilder;
-        unique_ptr<Lazarus::Mesh> skullBuilder;
-        unique_ptr<Lazarus::Mesh> floorsBuilder;
-        unique_ptr<Lazarus::Mesh> swordBuilder;
+        unique_ptr<Lazarus::MeshManager> meshBuilder;
 
-        shared_ptr<Lazarus::SoundManager::Audio> springWaltz;
-        shared_ptr<Lazarus::SoundManager::Audio> footstep;
+        Lazarus::AudioManager::Audio springWaltz;
 
-        Lazarus::Camera::FixedCamera camera;
-        Lazarus::Light::AmbientLight light;
+        Lazarus::CameraManager::Camera camera;
+        Lazarus::LightManager::Light light;
 
-        Lazarus::Mesh::TriangulatedMesh spiderweb;
-        Lazarus::Mesh::TriangulatedMesh skull;
-        Lazarus::Mesh::TriangulatedMesh walls;
-        Lazarus::Mesh::TriangulatedMesh floors;
-        Lazarus::Mesh::TriangulatedMesh sword;
+        Lazarus::MeshManager::Mesh skull;
+        Lazarus::MeshManager::Mesh walls;
+        Lazarus::MeshManager::Mesh floors;
+        Lazarus::MeshManager::Mesh spiderweb;
+        Lazarus::MeshManager::Mesh sword;
+
+        int word1;
+        int word2;
 };
