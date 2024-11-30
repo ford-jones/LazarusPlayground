@@ -18,7 +18,7 @@ Game::Game()
 
 void Game::init()
 {
-    globals.setLaunchInFullscreen(true);
+    // globals.setLaunchInFullscreen(true);
     
     window = std::make_unique<Lazarus::WindowManager>("Lazarus Engine");
     
@@ -124,9 +124,6 @@ void Game::start()
             transformer.rotateMeshAsset(sword, 0.0, 1.0, 0.0);
             
         /*text*/
-            textManager->loadText("Lazarus Engine", ((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80), 10, 0.6f, 0.0f, 0.0f, word1);
-            textManager->drawText(word1);
-
             std::string fps = std::string("FPS: ").append(std::to_string(static_cast<int>(fpsCounter.framesPerSecond)));
             textManager->loadText(fps, 50, 50, 5, 1.0f, 1.0f, 0.9f, word2);
             textManager->drawText(word2);
