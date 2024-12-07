@@ -18,7 +18,7 @@ Game::Game()
 
 void Game::init()
 {
-    globals.setLaunchInFullscreen(true);
+    // globals.setLaunchInFullscreen(true);
     
     window = std::make_unique<Lazarus::WindowManager>("Lazarus Engine");
     
@@ -41,7 +41,7 @@ void Game::init()
     light               = lightBuilder->createLightSource(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
     camera              = cameraBuilder->createPerspectiveCam(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
 
-    this->setupAudio();
+    // this->setupAudio();
     this->loadScene();
     this->layoutScene();
 
@@ -77,8 +77,6 @@ void Game::setupAudio()
 void Game::start()
 {
     window->open();
-    word1 = textManager->loadText("Lazarus Engine", ((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80), 10, 0.6f, 0.0f, 0.0f);
-    word2 = textManager->loadText("0", 50, 50, 5, 1.0f, 1.0f, 0.9f);
 
     while(window->isOpen)
     {
@@ -98,7 +96,7 @@ void Game::start()
             transformer.rotateCameraAsset(camera, turnX, turnY, 0.0);
             transformer.translateCameraAsset(camera, (moveX / 10), 0.0, (moveZ / 10));
 
-            soundManager->updateListenerLocation(camera.locationX, camera.locationY, camera.locationZ);
+            // soundManager->updateListenerLocation(camera.locationX, camera.locationY, camera.locationZ);
 
         /*skull*/
             meshBuilder->loadMesh(skull);
