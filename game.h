@@ -12,6 +12,7 @@ class Game
         void init();
         void loadScene();
         void layoutScene();
+        void loadText();
         void start();
 
     public:
@@ -54,4 +55,7 @@ class Game
 
         int word1;
         int word2;
+        int word3;
+        int word4;
+        int word5;
 };

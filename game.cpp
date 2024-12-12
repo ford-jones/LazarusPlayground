@@ -14,11 +14,13 @@ Game::Game()
 
     word1 = 0;
     word2 = 0;
+    word3 = 0;
+    word4 = 0;
 };
 
 void Game::init()
 {
-    // globals.setLaunchInFullscreen(true);
+    globals.setLaunchInFullscreen(true);
     
     window = std::make_unique<Lazarus::WindowManager>("Lazarus Engine");
     
@@ -41,12 +43,11 @@ void Game::init()
     light               = lightBuilder->createLightSource(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
     camera              = cameraBuilder->createPerspectiveCam(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
 
-    // this->setupAudio();
+    this->setupAudio();
     this->loadScene();
     this->layoutScene();
+    this->loadText();
 
-
-    textManager->extendFontStack("assets/fonts/MORPHEUS.TTF", 50);
 };
 
 void Game::loadScene()
@@ -58,6 +59,17 @@ void Game::loadScene()
     walls               = meshBuilder->create3DAsset("assets/mesh/walls.obj", "assets/material/walls.mtl", "assets/images/walls.png");
     spiderweb           = meshBuilder->createQuad(4.0, 4.0, "assets/images/spiderweb.png");
     sword               = meshBuilder->create3DAsset("assets/mesh/sword.obj", "assets/material/sword.mtl");
+};
+
+void Game::loadText()
+{
+    textManager->extendFontStack("assets/fonts/MORPHEUS.TTF", 50);
+
+    this->word1 = textManager->loadText("Lazarus Engine", ((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80), 10, 0.6f, 0.0f, 0.0f);
+    this->word2 = textManager->loadText(" ", 50, 50, 5, 1.0f, 1.0f, 0.9f);
+    this->word3 = textManager->loadText(" ", 50, 100, 5, 1.0f, 1.0f, 0.9f);
+    this->word4 = textManager->loadText(" ", 50, 150, 5, 1.0f, 1.0f, 0.9f);
+    this->word5 = textManager->loadText(" ", 50, globals.getDisplayHeight() - 80, 5, 1.0f, 1.0f, 0.9f);
 };
 
 void Game::layoutScene()
@@ -77,7 +89,7 @@ void Game::setupAudio()
 void Game::start()
 {
     window->open();
-
+    
     while(window->isOpen)
     {
         fpsCounter.calculateFramesPerSec();
@@ -91,12 +103,10 @@ void Game::start()
         transformer.translateLightAsset(light, (moveX / 10), 0.0, (moveZ / 10));
 
 		/*Camera*/
-            cameraBuilder->loadCamera(camera);
-
-            transformer.rotateCameraAsset(camera, turnX, turnY, 0.0);
-            transformer.translateCameraAsset(camera, (moveX / 10), 0.0, (moveZ / 10));
-
-            // soundManager->updateListenerLocation(camera.locationX, camera.locationY, camera.locationZ);
+        cameraBuilder->loadCamera(camera);
+        transformer.rotateCameraAsset(camera, turnX, turnY, 0.0);
+        transformer.translateCameraAsset(camera, (moveX / 10), 0.0, (moveZ / 10));
+        soundManager->updateListenerLocation(camera.position.x, camera.position.y, camera.position.z);
 
         /*skull*/
             meshBuilder->loadMesh(skull);
@@ -122,12 +132,30 @@ void Game::start()
             transformer.rotateMeshAsset(sword, 0.0, 1.0, 0.0);
             
         /*text*/
-            textManager->loadText("Lazarus Engine", ((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80), 10, 0.6f, 0.0f, 0.0f, word1);
+
+            //  TODO:
+            //  word1 never changes (is a static string) and so should not have to be reloaded inside of the render loop this manner
+
+            textManager->loadText("Lazarus Engine", ((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80), 10, 0.6f, 0.0f, 0.0f, this->word1);
             textManager->drawText(word1);
 
+            std::string cameraX = std::string("Camera-X: ").append(std::to_string(camera.position.x));
+            std::string cameraY = std::string("Camera-Y: ").append(std::to_string(camera.position.y));
+            std::string cameraZ = std::string("Camera-Z: ").append(std::to_string(camera.position.z));
+
             std::string fps = std::string("FPS: ").append(std::to_string(static_cast<int>(fpsCounter.framesPerSecond)));
-            textManager->loadText(fps, 50, 50, 5, 1.0f, 1.0f, 0.9f, word2);
+
+            textManager->loadText(cameraX, 50, 150, 5, 1.0f, 1.0f, 0.9f, word2);
             textManager->drawText(word2);
+
+            textManager->loadText(cameraY, 50, 100, 5, 1.0f, 1.0f, 0.9f, word3);
+            textManager->drawText(word3);
+
+            textManager->loadText(cameraZ, 50, 50, 5, 1.0f, 1.0f, 0.9f, word4);
+            textManager->drawText(word4);
+
+            textManager->loadText(fps, 50, globals.getDisplayHeight() - 80, 5, 1.0f, 1.0f, 0.9f, word5);
+            textManager->drawText(word5);
 
         window->handleBuffers();
 
