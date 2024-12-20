@@ -36,6 +36,8 @@ void Game::init()
     shaderProgram = shader.initialiseShader();
     window->loadConfig(shaderProgram);
 
+    worldBuilder        = std::make_unique<Lazarus::WorldFX>(shaderProgram);
+    meshBuilder         = std::make_unique<Lazarus::MeshManager>(shaderProgram);
     textManager         = std::make_unique<Lazarus::TextManager>(shaderProgram);
     lightBuilder        = std::make_unique<Lazarus::LightManager>(shaderProgram);
     cameraBuilder       = std::make_unique<Lazarus::CameraManager>(shaderProgram);
@@ -47,12 +49,11 @@ void Game::init()
     this->loadScene();
     this->layoutScene();
     this->loadText();
-
 };
 
 void Game::loadScene()
 {
-    meshBuilder         = std::make_unique<Lazarus::MeshManager>(shaderProgram);
+    skyBox              = worldBuilder->createSkyBox("assets/images/skybox/posx.png", "assets/images/skybox/negx.png", "assets/images/skybox/negy.png", "assets/images/skybox/posy.png", "assets/images/skybox/posz.png", "assets/images/skybox/negz.png");
 
     skull               = meshBuilder->create3DAsset("assets/mesh/skull.obj", "assets/material/skull.mtl", "assets/images/skull.png");
     floors              = meshBuilder->create3DAsset("assets/mesh/floors.obj", "assets/material/floors.mtl", "assets/images/floors.png");
@@ -107,6 +108,9 @@ void Game::start()
         transformer.rotateCameraAsset(camera, turnX, turnY, 0.0);
         transformer.translateCameraAsset(camera, (moveX / 10), 0.0, (moveZ / 10));
         soundManager->updateListenerLocation(camera.position.x, camera.position.y, camera.position.z);
+
+        /*sky*/
+            worldBuilder->drawSkyBox(skyBox, camera);
 
         /*skull*/
             meshBuilder->loadMesh(skull);

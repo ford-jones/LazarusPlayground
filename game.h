@@ -40,7 +40,10 @@ class Game
         unique_ptr<Lazarus::CameraManager> cameraBuilder;
         unique_ptr<Lazarus::LightManager> lightBuilder;
 
+        unique_ptr<Lazarus::WorldFX> worldBuilder;
         unique_ptr<Lazarus::MeshManager> meshBuilder;
+        
+        Lazarus::WorldFX::SkyBox skyBox;
 
         Lazarus::AudioManager::Audio springWaltz;
 
@@ -52,6 +55,7 @@ class Game
         Lazarus::MeshManager::Mesh floors;
         Lazarus::MeshManager::Mesh spiderweb;
         Lazarus::MeshManager::Mesh sword;
+
 
         int word1;
         int word2;
