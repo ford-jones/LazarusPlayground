@@ -1,4 +1,4 @@
-#include <lz.h>
+#include <lazarus.h>
 #include <string>
 #include <memory>
 
