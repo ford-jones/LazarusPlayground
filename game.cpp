@@ -21,6 +21,7 @@ Game::Game()
 void Game::init()
 {
     globals.setLaunchInFullscreen(true);
+    // globals.setVsyncDisabled(true);
     
     window = std::make_unique<Lazarus::WindowManager>("Lazarus Engine");
     

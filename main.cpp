@@ -2,7 +2,7 @@
     Title: "Lazarus: Demo World"
     Author: Ford Jones
     Updated: Dec 21 2024
-    Engine: Lazarus v0.4.0
+    Engine: Lazarus v0.4.1
 
     Tested Platforms:
     
@@ -17,6 +17,12 @@
     - Arch: x86_64
     - CPU: 1.4 GHz Dual-Core Intel Core i5
     - GPU: Intel HD Graphics 5000 1536 MB
+
+    MSI Prestige 15
+    - OS: Windows 10
+    - Arch: x86
+    - CPU: Intel Core i7-10710U @ 1.10GHz
+    - GPU: Intel UHD Graphics
 ============================================ */
 
 #include "game.h"
