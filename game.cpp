@@ -12,6 +12,8 @@ Game::Game()
     moveX = 0.0f;
     moveZ = 0.0f;
 
+    scale = 1.0f;
+
     word1 = 0;
     word2 = 0;
     word3 = 0;
@@ -85,7 +87,7 @@ void Game::setupAudio()
 {
     springWaltz = soundManager->createAudio("assets/sound/springWaltz.mp3", true, 0);
     soundManager->loadAudio(springWaltz);
-    soundManager->playAudio(springWaltz);
+    soundManager->playAudio(springWaltz); 
 };
 
 void Game::start()
@@ -116,6 +118,8 @@ void Game::start()
         /*skull*/
             meshBuilder->loadMesh(skull);
             meshBuilder->drawMesh(skull);
+
+            // transformer.scaleMeshAsset(skull, scale, scale, scale);
 
         /*floors*/
             meshBuilder->loadMesh(floors);
@@ -208,10 +212,21 @@ void Game::keyCapture(string key)
 		{
 			turnY += 1.0;
 		}
+        else if(key == "z")
+        {
+            scale += 0.01;
+            transformer.scaleMeshAsset(skull, scale, scale, scale);
+        }
+        else if(key == "x")
+        {
+            scale += -0.01;
+            transformer.scaleMeshAsset(skull, scale, scale, scale);
+        }
 		else 
 		{
 			moveX = 0.0;
 			moveZ = 0.0;
+            // scale = 0.0;
 		};
 
         if(turnX > 360.0f || turnX < -360)

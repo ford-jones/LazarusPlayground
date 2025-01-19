@@ -25,6 +25,7 @@ class Game
 
         float moveX, moveZ;
         float turnX, turnY;
+        float scale;
         
         const char** errorMessage;
 
