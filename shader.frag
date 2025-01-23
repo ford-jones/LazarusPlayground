@@ -1,5 +1,7 @@
 #version 410 core
 
+#define MAX_LIGHTS 150
+
 in vec3 fragPosition;
 in vec3 diffuseColor;
 in vec3 normalCoordinate;
@@ -7,9 +9,11 @@ in vec3 textureCoordinate;
 in vec3 skyBoxTextureCoordinate;
 
 flat in int isUnderPerspective;
+flat in float lightIntensity;
 
-uniform vec3 lightPosition;
-uniform vec3 lightColor;
+uniform int lightCount;
+uniform vec3 lightPositions[MAX_LIGHTS];
+uniform vec3 lightColors[MAX_LIGHTS];
 
 uniform vec3 textColor;
 
@@ -25,23 +29,13 @@ uniform samplerCube textureCube;
 
 out vec4 outFragment;
 
-vec3 calculateLambertianDeflection (vec4 colorData) 
+vec3 calculateLambertianDeflection (vec4 colorData, vec3 lightPosition, vec3 lightColor) 
 {
-    vec3 color = vec3(colorData.r, colorData.g, colorData.b);
-
     vec3 lightDirection = normalize(lightPosition - fragPosition);
-
-    float diff;
-    if(isUnderPerspective == 1)
-    {
-        diff = max(dot(normalCoordinate, lightDirection), 0.0);
-    }
-    else
-    {
-        diff = max(dot(normalCoordinate, lightDirection), 1.0);
-    }
-
-    vec3 illuminatedFrag = (color * lightColor * diff);
+    float diffusion = max(dot(normalCoordinate, lightDirection), 0.0);
+    vec3 color = vec3(colorData.r, colorData.g, colorData.b);
+    float attenuation = clamp(10.0 / lightIntensity, 0.0, 1.0);
+    vec3 illuminatedFrag = vec3(color * lightColor * (diffusion * attenuation));
     
     return illuminatedFrag;
 }
@@ -105,9 +99,21 @@ void main ()
     }
     else
     {
-        vec3 illumFrag = calculateLambertianDeflection(fragColor);
+        vec3 illuminationResult = vec3(0.0, 0.0, 0.0);
+        
+        if(isUnderPerspective == 0)
+        {
+            illuminationResult = (vec3(fragColor.r, fragColor.g, fragColor.b) * vec3(1.0, 1.0, 1.0) * 1.0);
+        }
+        else
+        {
+            for(int i = 0; i < lightCount; i++)
+            {
+                illuminationResult += (calculateLambertianDeflection(fragColor, lightPositions[i], lightColors[i]) * 0.2);
+            };
+        };
 
-        outFragment = vec4(illumFrag, 1.0);
+        outFragment = vec4(illuminationResult, 1.0);
     }
 
     return;
