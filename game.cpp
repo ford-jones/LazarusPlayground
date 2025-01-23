@@ -45,7 +45,8 @@ void Game::init()
     lightBuilder        = std::make_unique<Lazarus::LightManager>(shaderProgram);
     cameraBuilder       = std::make_unique<Lazarus::CameraManager>(shaderProgram);
 
-    light               = lightBuilder->createLightSource(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+    light1              = lightBuilder->createLightSource(1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0);
+    light2              = lightBuilder->createLightSource(-1.0, 1.0, -1.0, 0.0, 0.0, 1.0, 2.0);
     camera              = cameraBuilder->createPerspectiveCam(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
 
     this->setupAudio();
@@ -103,8 +104,9 @@ void Game::start()
         this->keyCapture(eventManager.keyString);
 
         /*Light*/
-        lightBuilder->loadLightSource(light);
-        transformer.translateLightAsset(light, (moveX / 10), 0.0, (moveZ / 10));
+        lightBuilder->loadLightSource(light1);
+        lightBuilder->loadLightSource(light2);
+        // transformer.translateLightAsset(light, (moveX / 10), 0.0, (moveZ / 10));
 
 		/*Camera*/
         cameraBuilder->loadCamera(camera);
@@ -118,8 +120,6 @@ void Game::start()
         /*skull*/
             meshBuilder->loadMesh(skull);
             meshBuilder->drawMesh(skull);
-
-            // transformer.scaleMeshAsset(skull, scale, scale, scale);
 
         /*floors*/
             meshBuilder->loadMesh(floors);
@@ -226,7 +226,6 @@ void Game::keyCapture(string key)
 		{
 			moveX = 0.0;
 			moveZ = 0.0;
-            // scale = 0.0;
 		};
 
         if(turnX > 360.0f || turnX < -360)

@@ -49,7 +49,8 @@ class Game
         Lazarus::AudioManager::Audio springWaltz;
 
         Lazarus::CameraManager::Camera camera;
-        Lazarus::LightManager::Light light;
+        Lazarus::LightManager::Light light1;
+        Lazarus::LightManager::Light light2;
 
         Lazarus::MeshManager::Mesh skull;
         Lazarus::MeshManager::Mesh walls;
