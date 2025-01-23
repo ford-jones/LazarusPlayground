@@ -9,11 +9,11 @@ in vec3 textureCoordinate;
 in vec3 skyBoxTextureCoordinate;
 
 flat in int isUnderPerspective;
-flat in float lightIntensity;
 
 uniform int lightCount;
 uniform vec3 lightPositions[MAX_LIGHTS];
 uniform vec3 lightColors[MAX_LIGHTS];
+uniform float lightBrightness[MAX_LIGHTS];
 
 uniform vec3 textColor;
 
@@ -29,19 +29,22 @@ uniform samplerCube textureCube;
 
 out vec4 outFragment;
 
+//  Illuminate the fragment using the lambertian lighting model
 vec3 calculateLambertianDeflection (vec4 colorData, vec3 lightPosition, vec3 lightColor) 
 {
-    vec3 lightDirection = normalize(lightPosition - fragPosition);
-    float diffusion = max(dot(normalCoordinate, lightDirection), 0.0);
+    vec3 direction = normalize(lightPosition - fragPosition);
+    float diffusion = max(dot(normalCoordinate, direction), 0.0);
     vec3 color = vec3(colorData.r, colorData.g, colorData.b);
-    float attenuation = clamp(10.0 / lightIntensity, 0.0, 1.0);
-    vec3 illuminatedFrag = vec3(color * lightColor * (diffusion * attenuation));
+    vec3 illuminatedFrag = (color * lightColor * diffusion);
     
     return illuminatedFrag;
 }
 
 vec4 interpretColorData ()
 {
+    //  rgb with values less than 0 indicate the fragment has no texture and should use diffuse coloring
+    //  Otherwise its a texture so pick out the texels from the appropriate sampler
+
     if((diffuseColor.r >= 0.0) &&
        (diffuseColor.g >= 0.0) && 
        (diffuseColor.b >= 0.0))
@@ -93,24 +96,19 @@ void main ()
 {
     vec4 fragColor = interpretColorData();
             
-    if(isSkyBox == 1)
+    //  When the fragment is part of a skybox or is observed by an orthographic camera, use color as-is.
+    if(isSkyBox == 1 || isUnderPerspective == 0)
     {
         outFragment = fragColor;
     }
     else
     {
         vec3 illuminationResult = vec3(0.0, 0.0, 0.0);
-        
-        if(isUnderPerspective == 0)
+
+        //  Calculate the fragment's diffuse lighting for each light in the scene.
+        for(int i = 0; i < lightCount; i++)
         {
-            illuminationResult = (vec3(fragColor.r, fragColor.g, fragColor.b) * vec3(1.0, 1.0, 1.0) * 1.0);
-        }
-        else
-        {
-            for(int i = 0; i < lightCount; i++)
-            {
-                illuminationResult += (calculateLambertianDeflection(fragColor, lightPositions[i], lightColors[i]) * 0.2);
-            };
+            illuminationResult += (calculateLambertianDeflection(fragColor, lightPositions[i], lightColors[i]) * lightBrightness[i]);
         };
 
         outFragment = vec4(illuminationResult, 1.0);

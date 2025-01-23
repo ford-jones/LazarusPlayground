@@ -6,7 +6,6 @@ layout(location = 2) in vec3 inNormal;
 layout(location = 3) in vec3 inTexCoord;
 
 uniform int usesPerspective;
-uniform float brightness;
 
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
@@ -20,7 +19,6 @@ out vec3 textureCoordinate;
 out vec3 skyBoxTextureCoordinate;
 
 flat out int isUnderPerspective;
-flat out float lightIntensity;
 
 void main ()
 {
@@ -41,6 +39,5 @@ void main ()
    textureCoordinate = inTexCoord;
 
    isUnderPerspective = usesPerspective;
-   lightIntensity = brightness;
    skyBoxTextureCoordinate = -inVertex;
 }
