@@ -30,10 +30,8 @@ class Game
         const char** errorMessage;
 
         Lazarus::GlobalsManager globals;
-        Lazarus::EventManager eventManager;
         Lazarus::Shader shader;
         Lazarus::Transform transformer;
-        Lazarus::FpsCounter fpsCounter;
 
         unique_ptr<Lazarus::WindowManager> window;
         unique_ptr<Lazarus::AudioManager> soundManager;
@@ -45,6 +43,7 @@ class Game
         unique_ptr<Lazarus::MeshManager> meshBuilder;
         
         Lazarus::WorldFX::SkyBox skyBox;
+        Lazarus::WorldFX::Fog fog;
 
         Lazarus::AudioManager::Audio springWaltz;
 
@@ -59,9 +58,9 @@ class Game
         Lazarus::MeshManager::Mesh sword;
 
 
-        int word1;
-        int word2;
-        int word3;
-        int word4;
-        int word5;
+        Lazarus::TextManager::Text word1;
+        Lazarus::TextManager::Text word2;
+        Lazarus::TextManager::Text word3;
+        Lazarus::TextManager::Text word4;
+        Lazarus::TextManager::Text word5;
 };

@@ -14,10 +14,14 @@ Game::Game()
 
     scale = 1.0f;
 
-    word1 = 0;
-    word2 = 0;
-    word3 = 0;
-    word4 = 0;
+    skyBox = {};
+    fog = {};
+
+    word1 = {};
+    word2 = {};
+    word3 = {};
+    word4 = {};
+    word5 = {};
 };
 
 void Game::init()
@@ -27,8 +31,8 @@ void Game::init()
     
     window = std::make_unique<Lazarus::WindowManager>("Lazarus Engine");
     
-    window->initialise();
-    eventManager.initialise();
+    window->createWindow();
+    window->eventsInit();
     soundManager->initialise();
 
     window->createCursor(32, 32, 0, 0, "assets/images/crosshair.png");
@@ -36,7 +40,7 @@ void Game::init()
     globals.setEnforceImageSanity(true);
     globals.setMaxImageSize(500, 500);
 
-    shaderProgram = shader.initialiseShader();
+    shaderProgram = shader.compileShaders();
     window->loadConfig(shaderProgram);
 
     worldBuilder        = std::make_unique<Lazarus::WorldFX>(shaderProgram);
@@ -47,7 +51,7 @@ void Game::init()
 
     light1              = lightBuilder->createLightSource(1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0);
     light2              = lightBuilder->createLightSource(-1.0, 1.0, -1.0, 0.0, 0.0, 1.0, 2.0);
-    camera              = cameraBuilder->createPerspectiveCam(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
+    camera              = cameraBuilder->createPerspectiveCam();
 
     this->setupAudio();
     this->loadScene();
@@ -58,6 +62,7 @@ void Game::init()
 void Game::loadScene()
 {
     skyBox              = worldBuilder->createSkyBox("assets/images/skybox/posx.png", "assets/images/skybox/negx.png", "assets/images/skybox/negy.png", "assets/images/skybox/posy.png", "assets/images/skybox/posz.png", "assets/images/skybox/negz.png");
+    fog                 = worldBuilder->createFog(1.0, 10.0, 1.0, 0.5, 0.5, 0.5);
 
     skull               = meshBuilder->create3DAsset("assets/mesh/skull.obj", "assets/material/skull.mtl", "assets/images/skull.png");
     floors              = meshBuilder->create3DAsset("assets/mesh/floors.obj", "assets/material/floors.mtl", "assets/images/floors.png");
@@ -97,30 +102,29 @@ void Game::start()
     
     while(window->isOpen)
     {
-        fpsCounter.calculateFramesPerSec();
+        window->monitorFPS();
+        window->monitorEvents();        
         
-        /*Events*/
-        eventManager.listen();
-        this->keyCapture(eventManager.keyString);
+        this->keyCapture(window->keyEventString);
 
         /*Light*/
         lightBuilder->loadLightSource(light1);
         lightBuilder->loadLightSource(light2);
-        // transformer.translateLightAsset(light, (moveX / 10), 0.0, (moveZ / 10));
 
 		/*Camera*/
         cameraBuilder->loadCamera(camera);
         transformer.rotateCameraAsset(camera, turnX, turnY, 0.0);
-        transformer.translateCameraAsset(camera, (moveX / 10), 0.0, (moveZ / 10));
+        transformer.translateCameraAsset(camera, moveX, 0.0, moveZ);
         soundManager->updateListenerLocation(camera.position.x, camera.position.y, camera.position.z);
 
         /*sky*/
             worldBuilder->drawSkyBox(skyBox, camera);
+            fog.viewpoint = glm::vec3(camera.position.x, camera.position.y, camera.position.z);
+            worldBuilder->loadFog(fog);
 
         /*skull*/
             meshBuilder->loadMesh(skull);
             meshBuilder->drawMesh(skull);
-
         /*floors*/
             meshBuilder->loadMesh(floors);
             meshBuilder->drawMesh(floors);
@@ -141,10 +145,6 @@ void Game::start()
             transformer.rotateMeshAsset(sword, 0.0, 1.0, 0.0);
             
         /*text*/
-
-            //  TODO:
-            //  word1 never changes (is a static string) and so should not have to be reloaded inside of the render loop this manner
-
             textManager->loadText("Lazarus Engine", ((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80), 10, 0.6f, 0.0f, 0.0f, this->word1);
             textManager->drawText(word1);
 
@@ -152,7 +152,7 @@ void Game::start()
             std::string cameraY = std::string("Camera-Y: ").append(std::to_string(camera.position.y));
             std::string cameraZ = std::string("Camera-Z: ").append(std::to_string(camera.position.z));
 
-            std::string fps = std::string("FPS: ").append(std::to_string(static_cast<int>(fpsCounter.framesPerSecond)));
+            std::string fps = std::string("FPS: ").append(std::to_string(static_cast<int>(window->framesPerSecond)));
 
             textManager->loadText(cameraX, 50, 150, 5, 1.0f, 1.0f, 0.9f, word2);
             textManager->drawText(word2);
@@ -166,7 +166,7 @@ void Game::start()
             textManager->loadText(fps, 50, globals.getDisplayHeight() - 80, 5, 1.0f, 1.0f, 0.9f, word5);
             textManager->drawText(word5);
 
-        window->handleBuffers();
+        window->presentNextFrame();
 
         engineStatus = globals.getExecutionState();
         
@@ -182,19 +182,19 @@ void Game::keyCapture(string key)
 {
 		if(key == "up")
 		{
-			moveZ = 0.5;
+			moveZ = 0.2;
 		}
 		else if(key == "down")
 		{
-			moveZ = -0.5;
+			moveZ = -0.2;
 		}
 		else if(key == "left")
 		{
-			moveX = -0.5;
+			moveX = -0.2;
 		}
 		else if(key == "right")
 		{
-			moveX = 0.5;
+			moveX = 0.2;
 		}
 		else if(key == "w")
 		{
@@ -215,12 +215,10 @@ void Game::keyCapture(string key)
         else if(key == "z")
         {
             scale += 0.01;
-            transformer.scaleMeshAsset(skull, scale, scale, scale);
         }
         else if(key == "x")
         {
             scale += -0.01;
-            transformer.scaleMeshAsset(skull, scale, scale, scale);
         }
 		else 
 		{
