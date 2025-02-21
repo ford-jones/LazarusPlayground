@@ -62,7 +62,7 @@ void Game::init()
 void Game::loadScene()
 {
     skyBox              = worldBuilder->createSkyBox("assets/images/skybox/posx.png", "assets/images/skybox/negx.png", "assets/images/skybox/negy.png", "assets/images/skybox/posy.png", "assets/images/skybox/posz.png", "assets/images/skybox/negz.png");
-    fog                 = worldBuilder->createFog(1.0, 10.0, 1.0, 0.5, 0.5, 0.5);
+    fog                 = worldBuilder->createFog(1.0, 10.0, 0.4, 0.5, 0.5, 0.5);
 
     skull               = meshBuilder->create3DAsset("assets/mesh/skull.obj", "assets/material/skull.mtl", "assets/images/skull.png");
     floors              = meshBuilder->create3DAsset("assets/mesh/floors.obj", "assets/material/floors.mtl", "assets/images/floors.png");
