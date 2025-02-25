@@ -63,11 +63,11 @@ void Game::loadScene()
 {
     skyBox              = worldBuilder->createSkyBox("assets/images/skybox/posx.png", "assets/images/skybox/negx.png", "assets/images/skybox/negy.png", "assets/images/skybox/posy.png", "assets/images/skybox/posz.png", "assets/images/skybox/negz.png");
     fog                 = worldBuilder->createFog(1.0, 10.0, 0.4, 0.5, 0.5, 0.5);
-
-    skull               = meshBuilder->create3DAsset("assets/mesh/skull.obj", "assets/material/skull.mtl", "assets/images/skull.png");
-    floors              = meshBuilder->create3DAsset("assets/mesh/floors.obj", "assets/material/floors.mtl", "assets/images/floors.png");
-    walls               = meshBuilder->create3DAsset("assets/mesh/walls.obj", "assets/material/walls.mtl", "assets/images/walls.png");
+    
     spiderweb           = meshBuilder->createQuad(4.0, 4.0, "assets/images/spiderweb.png");
+    skull               = meshBuilder->create3DAsset("assets/mesh/skull.obj", "assets/material/skull.mtl", "assets/images/skull.png", true);
+    floors              = meshBuilder->create3DAsset("assets/mesh/floors.obj", "assets/material/floors.mtl", "assets/images/floors.png");
+    walls               = meshBuilder->create3DAsset("assets/mesh/walls.obj", "assets/material/walls.mtl", "assets/images/walls.png", true);
     sword               = meshBuilder->create3DAsset("assets/mesh/sword.obj", "assets/material/sword.mtl");
 };
 
@@ -103,7 +103,8 @@ void Game::start()
     while(window->isOpen)
     {
         window->monitorFPS();
-        window->monitorEvents();        
+        window->monitorEvents();
+        window->monitorPixelOccupants();
         
         this->keyCapture(window->keyEventString);
 
@@ -116,58 +117,59 @@ void Game::start()
         transformer.rotateCameraAsset(camera, turnX, turnY, 0.0);
         transformer.translateCameraAsset(camera, moveX, 0.0, moveZ);
         soundManager->updateListenerLocation(camera.position.x, camera.position.y, camera.position.z);
-
+        
         /*sky*/
             worldBuilder->drawSkyBox(skyBox, camera);
             fog.viewpoint = glm::vec3(camera.position.x, camera.position.y, camera.position.z);
             worldBuilder->loadFog(fog);
-
-        /*skull*/
+            
+            /*skull*/
             meshBuilder->loadMesh(skull);
             meshBuilder->drawMesh(skull);
-        /*floors*/
+            /*floors*/
             meshBuilder->loadMesh(floors);
             meshBuilder->drawMesh(floors);
-
-        /*walls*/
+            
+            /*walls*/
             meshBuilder->loadMesh(walls);
             meshBuilder->drawMesh(walls);
-
-        /*spiderweb*/
+            
+            /*spiderweb*/
             meshBuilder->loadMesh(spiderweb);
             meshBuilder->drawMesh(spiderweb);
-
-        /*sword*/
+            
+            /*sword*/
             meshBuilder->loadMesh(sword);
             meshBuilder->drawMesh(sword);
-
+            
             transformer.translateMeshAsset(sword, (0.5 / 10), 0.0, 0.0);
             transformer.rotateMeshAsset(sword, 0.0, 1.0, 0.0);
             
-        /*text*/
+            /*text*/
             textManager->loadText("Lazarus Engine", ((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80), 10, 0.6f, 0.0f, 0.0f, this->word1);
             textManager->drawText(word1);
-
+            
             std::string cameraX = std::string("Camera-X: ").append(std::to_string(camera.position.x));
             std::string cameraY = std::string("Camera-Y: ").append(std::to_string(camera.position.y));
             std::string cameraZ = std::string("Camera-Z: ").append(std::to_string(camera.position.z));
-
-            std::string fps = std::string("FPS: ").append(std::to_string(static_cast<int>(window->framesPerSecond)));
-
+            
+            int32_t occupant = cameraBuilder->getPixelOccupant(window->mousePositionX, window->mousePositionY);
+            std::string fps = std::string("FPS: ").append(std::to_string(static_cast<int>(occupant)));
+            
             textManager->loadText(cameraX, 50, 150, 5, 1.0f, 1.0f, 0.9f, word2);
             textManager->drawText(word2);
-
+            
             textManager->loadText(cameraY, 50, 100, 5, 1.0f, 1.0f, 0.9f, word3);
             textManager->drawText(word3);
-
+            
             textManager->loadText(cameraZ, 50, 50, 5, 1.0f, 1.0f, 0.9f, word4);
             textManager->drawText(word4);
-
+            
             textManager->loadText(fps, 50, globals.getDisplayHeight() - 80, 5, 1.0f, 1.0f, 0.9f, word5);
             textManager->drawText(word5);
-
-        window->presentNextFrame();
-
+            
+            window->presentNextFrame();
+            
         engineStatus = globals.getExecutionState();
         
         if(engineStatus != LAZARUS_OK)
