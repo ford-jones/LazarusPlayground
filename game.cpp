@@ -62,7 +62,7 @@ void Game::init()
 void Game::loadScene()
 {
     skyBox              = worldBuilder->createSkyBox("assets/images/skybox/posx.png", "assets/images/skybox/negx.png", "assets/images/skybox/negy.png", "assets/images/skybox/posy.png", "assets/images/skybox/posz.png", "assets/images/skybox/negz.png");
-    fog                 = worldBuilder->createFog(1.0, 10.0, 0.4, 0.5, 0.5, 0.5);
+    fog                 = worldBuilder->createFog(1.0, 10.0, 0.3, 0.5, 0.5, 0.5);
     
     spiderweb           = meshBuilder->createQuad(4.0, 4.0, "assets/images/spiderweb.png");
     skull               = meshBuilder->create3DAsset("assets/mesh/skull.obj", "assets/material/skull.mtl", "assets/images/skull.png", true);
@@ -153,9 +153,11 @@ void Game::start()
             std::string cameraY = std::string("Camera-Y: ").append(std::to_string(camera.position.y));
             std::string cameraZ = std::string("Camera-Z: ").append(std::to_string(camera.position.z));
             
-            int32_t occupant = cameraBuilder->getPixelOccupant(window->mousePositionX, window->mousePositionY);
-            std::string fps = std::string("FPS: ").append(std::to_string(static_cast<int>(occupant)));
+            std::string fps = std::string("FPS: ").append(std::to_string(static_cast<int>(window->framesPerSecond)));
             
+            int32_t occupant = cameraBuilder->getPixelOccupant(window->mousePositionX, window->mousePositionY);
+            std::cout << "Mesh / occupant-id under cursor focus: " << occupant << std::endl;
+
             textManager->loadText(cameraX, 50, 150, 5, 1.0f, 1.0f, 0.9f, word2);
             textManager->drawText(word2);
             
