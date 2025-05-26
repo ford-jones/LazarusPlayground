@@ -3,6 +3,7 @@
 Game::Game()
 {
     soundManager = std::make_unique<Lazarus::AudioManager>();
+    globals = Lazarus::GlobalsManager();
     window = nullptr;
     textManager = nullptr;
     springWaltz = {};
@@ -35,13 +36,16 @@ void Game::init()
     window->eventsInit();
     soundManager->initialise();
 
+    //  Create cursor prior to enforced image sanitisation
     window->createCursor(32, 32, 0, 0, "assets/images/crosshair.png");
 
     globals.setEnforceImageSanity(true);
     globals.setMaxImageSize(500, 500);
+    
+    window->loadConfig();
 
     shaderProgram = shader.compileShaders();
-    window->loadConfig(shaderProgram);
+    shader.setActiveShader(shaderProgram);
 
     worldBuilder        = std::make_unique<Lazarus::WorldFX>(shaderProgram);
     meshBuilder         = std::make_unique<Lazarus::MeshManager>(shaderProgram);
