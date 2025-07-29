@@ -25,7 +25,6 @@ class Game
 
         float moveX, moveZ;
         float turnX, turnY;
-        float scale;
         
         const char** errorMessage;
 
@@ -56,11 +55,16 @@ class Game
         Lazarus::MeshManager::Mesh floors;
         Lazarus::MeshManager::Mesh spiderweb;
         Lazarus::MeshManager::Mesh sword;
+        Lazarus::MeshManager::Mesh earth;
+        Lazarus::MeshManager::Mesh metaball;
 
+        int32_t morpheusFont;
+        int32_t ubuntuFont;
 
         Lazarus::TextManager::Text word1;
         Lazarus::TextManager::Text word2;
         Lazarus::TextManager::Text word3;
         Lazarus::TextManager::Text word4;
         Lazarus::TextManager::Text word5;
+        Lazarus::TextManager::Text word6;
 };
