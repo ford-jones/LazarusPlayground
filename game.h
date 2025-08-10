@@ -1,6 +1,7 @@
 #include <lazarus.h>
 #include <string>
 #include <memory>
+#include <chrono>
 
 using std::unique_ptr;
 using std::shared_ptr;
@@ -10,7 +11,7 @@ class Game
     public:
         Game();
         void init();
-        void loadScene();
+        void loadAssets();
         void layoutScene();
         void loadText();
         void start();
@@ -25,7 +26,6 @@ class Game
 
         float moveX, moveZ;
         float turnX, turnY;
-        float scale;
         
         const char** errorMessage;
 
@@ -54,13 +54,18 @@ class Game
         Lazarus::MeshManager::Mesh skull;
         Lazarus::MeshManager::Mesh walls;
         Lazarus::MeshManager::Mesh floors;
-        Lazarus::MeshManager::Mesh spiderweb;
         Lazarus::MeshManager::Mesh sword;
+        Lazarus::MeshManager::Mesh earth;
+        Lazarus::MeshManager::Mesh metaball;
+        // Lazarus::MeshManager::Mesh monkey;
 
+        int32_t morpheusFont;
+        int32_t ubuntuFont;
 
         Lazarus::TextManager::Text word1;
         Lazarus::TextManager::Text word2;
         Lazarus::TextManager::Text word3;
         Lazarus::TextManager::Text word4;
         Lazarus::TextManager::Text word5;
+        Lazarus::TextManager::Text word6;
 };
