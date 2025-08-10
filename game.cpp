@@ -2,7 +2,7 @@
 
 Game::Game()
 {
-    // soundManager = std::make_unique<Lazarus::AudioManager>();
+    soundManager = std::make_unique<Lazarus::AudioManager>();
     globals = Lazarus::GlobalsManager();
     window = nullptr;
     textManager = nullptr;
@@ -36,7 +36,7 @@ void Game::init()
     
     window->createWindow();
     window->eventsInit();
-    // soundManager->initialise();
+    soundManager->initialise();
 
     //  Create cursor prior to enforced image sanitisation
     window->createCursor(32, 32, 0, 0, "assets/images/crosshair.png");
@@ -59,19 +59,26 @@ void Game::init()
     light2              = lightBuilder->createLightSource(-1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 2.0f);
     camera              = cameraBuilder->createPerspectiveCam();
 
-    // this->setupAudio();
-    this->loadScene();
+    this->setupAudio();
+    this->loadAssets();
     this->layoutScene();
     this->loadText();
 };
 
-void Game::loadScene()
+void Game::loadAssets()
 {
     skyBox              = worldBuilder->createSkyBox("assets/images/skybox/posx.png", "assets/images/skybox/negx.png", "assets/images/skybox/negy.png", "assets/images/skybox/posy.png", "assets/images/skybox/posz.png", "assets/images/skybox/negz.png");
     fog                 = worldBuilder->createFog(5.0, 20.0f, 0.3f, 0.5f, 0.5f, 0.5f);
+
+    /* ~0.3ms with compiler optimisations -> 188,000 vertices */
+    // auto start = std::chrono::system_clock::now();
+    // monkey               = meshBuilder->create3DAsset("assets/mesh/monkey.glb");
+    // auto end = std::chrono::system_clock::now();
+    // std::chrono::duration<double> elapsed_ms = (end - start);
+    // std::cout << "\n" << std::endl;
+    // std::cout << "Elapsed time: " << elapsed_ms.count() << std::endl;
     
     earth               = meshBuilder->create3DAsset("assets/mesh/earth.glb");
-    spiderweb           = meshBuilder->createQuad(4.0f, 4.0f, "assets/images/spiderweb.png");
     skull               = meshBuilder->create3DAsset("assets/mesh/skull.obj", "assets/material/skull.mtl", "assets/images/skull.png", true);
     floors              = meshBuilder->create3DAsset("assets/mesh/floors.obj", "assets/material/floors.mtl", "assets/images/floors.png");
     walls               = meshBuilder->create3DAsset("assets/mesh/walls.obj", "assets/material/walls.mtl", "assets/images/walls.png", true);
@@ -94,12 +101,10 @@ void Game::loadText()
 
 void Game::layoutScene()
 {
-    transformer.rotateMeshAsset(spiderweb, -25.0f, -40.0f, 0.0f);
-
-    transformer.translateMeshAsset(spiderweb, 1.5f, -1.0f, -3.0f);
     transformer.translateMeshAsset(sword, 0.0f, 1.0f, 3.0f);
     transformer.translateMeshAsset(earth, 0.0f, 3.0f, 0.0f);
     transformer.translateMeshAsset(metaball, 20.0f, 0.0f, 0.0f);
+    // transformer.translateMeshAsset(monkey, 0.0f, 0.0f, 10.0f);
 
     transformer.scaleMeshAsset(metaball, 6.0f, 6.0f, 6.0f);
 };
@@ -131,7 +136,7 @@ void Game::start()
         cameraBuilder->loadCamera(camera);
         transformer.rotateCameraAsset(camera, turnX, turnY, 0.0f);
         transformer.translateCameraAsset(camera, moveX, 0.0f, moveZ);
-        // soundManager->updateListenerLocation(camera.position.x, camera.position.y, camera.position.z);
+        soundManager->updateListenerLocation(camera.position.x, camera.position.y, camera.position.z);
         
         /*sky*/
         fog.viewpoint = glm::vec3(camera.position.x, camera.position.y, camera.position.z);
@@ -147,9 +152,6 @@ void Game::start()
         /*walls*/
         meshBuilder->loadMesh(walls);
         meshBuilder->drawMesh(walls);
-        /*spiderweb*/
-        meshBuilder->loadMesh(spiderweb);
-        meshBuilder->drawMesh(spiderweb);
         /*earth*/
         meshBuilder->loadMesh(earth);
         meshBuilder->drawMesh(earth);
@@ -159,6 +161,9 @@ void Game::start()
         /*metaball*/
         meshBuilder->loadMesh(metaball);
         meshBuilder->drawMesh(metaball);
+        // /*monkey*/
+        // meshBuilder->loadMesh(monkey);
+        // meshBuilder->drawMesh(monkey);
         
         transformer.translateMeshAsset(sword, (0.5f / 10), 0.0f, 0.0f);
         transformer.rotateMeshAsset(sword, 0.0f, 1.0f, 0.0f);
