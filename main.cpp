@@ -2,7 +2,7 @@
     Title: "Lazarus: Demo World"
     Author: Ford Jones
     Updated: Aug 11 2025
-    Engine: Lazarus v0.12.0
+    Engine: Lazarus v0.12.1
 
     Tested Platforms:
     

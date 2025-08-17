@@ -36,7 +36,7 @@ void Game::init()
     
     window->createWindow();
     window->eventsInit();
-    soundManager->initialise();
+    // soundManager->initialise();
 
     //  Create cursor prior to enforced image sanitisation
     window->createCursor(32, 32, 0, 0, "assets/images/crosshair.png");
@@ -55,11 +55,11 @@ void Game::init()
     lightBuilder        = std::make_unique<Lazarus::LightManager>(shaderProgram);
     cameraBuilder       = std::make_unique<Lazarus::CameraManager>(shaderProgram);
 
-    light1              = lightBuilder->createLightSource(1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f);
-    light2              = lightBuilder->createLightSource(-1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 2.0f);
+    light1              = lightBuilder->createLightSource(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
+    light2              = lightBuilder->createLightSource(glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0.0f, 0.0f, 1.0f), 2.0f);
     camera              = cameraBuilder->createPerspectiveCam();
 
-    this->setupAudio();
+    // this->setupAudio();
     this->loadAssets();
     this->layoutScene();
     this->loadText();
@@ -68,7 +68,7 @@ void Game::init()
 void Game::loadAssets()
 {
     skyBox              = worldBuilder->createSkyBox("assets/images/skybox/posx.png", "assets/images/skybox/negx.png", "assets/images/skybox/negy.png", "assets/images/skybox/posy.png", "assets/images/skybox/posz.png", "assets/images/skybox/negz.png");
-    fog                 = worldBuilder->createFog(5.0, 20.0f, 0.3f, 0.5f, 0.5f, 0.5f);
+    fog                 = worldBuilder->createFog(5.0, 20.0f, 0.3f, glm::vec3(0.5f, 0.5f, 0.5f));
 
     /* ~0.3ms with compiler optimisations -> 188,000 vertices */
     // auto start = std::chrono::system_clock::now();
@@ -91,12 +91,12 @@ void Game::loadText()
     this->ubuntuFont = textManager->extendFontStack("assets/fonts/Ubuntu-R.ttf", 150);
     this->morpheusFont = textManager->extendFontStack("assets/fonts/MORPHEUS.TTF", 50);
 
-    this->word1 = textManager->loadText("Lazarus Engine", this->morpheusFont, ((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80), 10, 0.6f, 0.0f, 0.0f);
-    this->word2 = textManager->loadText(" ", this->morpheusFont, 50, 50, 5, 1.0f, 1.0f, 0.9f);
-    this->word3 = textManager->loadText(" ", this->morpheusFont, 50, 100, 5, 1.0f, 1.0f, 0.9f);
-    this->word4 = textManager->loadText(" ", this->morpheusFont, 50, 150, 5, 1.0f, 1.0f, 0.9f);
-    this->word5 = textManager->loadText(" ", this->ubuntuFont, 50, globals.getDisplayHeight() - 80, 5, 1.0f, 1.0f, 0.9f);
-    this->word6 = textManager->loadText(" ", this->ubuntuFont, 50, globals.getDisplayHeight() - 120, 5, 1.0f, 1.0f, 0.9f);
+    this->word1 = textManager->loadText("Lazarus Engine", this->morpheusFont, glm::vec2(((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80)), glm::vec3(0.6f, 0.0f, 0.0f), 10);
+    this->word2 = textManager->loadText(" ", this->morpheusFont, glm::vec2(50, 50), glm::vec3(1.0f, 1.0f, 0.9f));
+    this->word3 = textManager->loadText(" ", this->morpheusFont, glm::vec2(50, 100), glm::vec3(1.0f, 1.0f, 0.9f), 5);
+    this->word4 = textManager->loadText(" ", this->morpheusFont, glm::vec2(50, 150), glm::vec3(1.0f, 1.0f, 0.9f), 5);
+    this->word5 = textManager->loadText(" ", this->ubuntuFont, glm::vec2(50, globals.getDisplayHeight() - 80), glm::vec3(1.0f, 1.0f, 0.9f));
+    this->word6 = textManager->loadText(" ", this->ubuntuFont, glm::vec2(50, globals.getDisplayHeight() - 120), glm::vec3(1.0f, 1.0f, 0.9f));
 };
 
 void Game::layoutScene()
@@ -136,12 +136,13 @@ void Game::start()
         cameraBuilder->loadCamera(camera);
         transformer.rotateCameraAsset(camera, turnX, turnY, 0.0f);
         transformer.translateCameraAsset(camera, moveX, 0.0f, moveZ);
-        soundManager->updateListenerLocation(camera.position.x, camera.position.y, camera.position.z);
+        // soundManager->updateListenerLocation(camera.position.x, camera.position.y, camera.position.z);
         
         /*sky*/
         fog.viewpoint = glm::vec3(camera.position.x, camera.position.y, camera.position.z);
         worldBuilder->loadFog(fog);
         worldBuilder->drawSkyBox(skyBox, camera);
+        
         
         /*skull*/
         meshBuilder->loadMesh(skull);
@@ -170,7 +171,7 @@ void Game::start()
         transformer.rotateMeshAsset(earth, 0.0f, -0.7f, 0.0f);
         
         /*text*/
-        textManager->loadText("Lazarus Engine", this->morpheusFont, ((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80), 10, 0.6f, 0.0f, 0.0f, this->word1);
+        textManager->loadText("Lazarus Engine", this->morpheusFont, glm::vec2(((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80)), glm::vec3(0.6f, 0.0f, 0.0f), 10, this->word1);
         textManager->drawText(word1);
         
         std::string cameraX     = std::string("Camera-X: ").append(std::to_string(camera.position.x));
@@ -179,19 +180,19 @@ void Game::start()
         std::string fps         = std::string("FPS: ").append(std::to_string(static_cast<int>(window->framesPerSecond)));
         std::string occupant    = std::string("Select ID: ").append(std::to_string(cameraBuilder->getPixelOccupant(window->mousePositionX, window->mousePositionY)));
         
-        textManager->loadText(cameraX, this->morpheusFont, 50, 150, 5, 1.0f, 1.0f, 0.9f, word2);
+        textManager->loadText(cameraX, this->morpheusFont, glm::vec2(50, 150), glm::vec3(1.0f, 1.0f, 0.9f), 5, word2);
         textManager->drawText(word2);
         
-        textManager->loadText(cameraY, this->morpheusFont, 50, 100, 5, 1.0f, 1.0f, 0.9f, word3);
+        textManager->loadText(cameraY, this->morpheusFont, glm::vec2(50, 100), glm::vec3(1.0f, 1.0f, 0.9f), 5, word3);
         textManager->drawText(word3);
         
-        textManager->loadText(cameraZ, this->morpheusFont, 50, 50, 5, 1.0f, 1.0f, 0.9f, word4);
+        textManager->loadText(cameraZ, this->morpheusFont, glm::vec2(50, 50), glm::vec3(1.0f, 1.0f, 0.9f), 5, word4);
         textManager->drawText(word4);
         
-        textManager->loadText(fps, this->ubuntuFont, 50, globals.getDisplayHeight() - 80, 5, 1.0f, 1.0f, 0.9f, word5);
+        textManager->loadText(fps, this->ubuntuFont, glm::vec2(50, globals.getDisplayHeight() - 80), glm::vec3(1.0f, 1.0f, 0.9f), 5, word5);
         textManager->drawText(word5);
 
-        textManager->loadText(occupant, this->ubuntuFont, 50, globals.getDisplayHeight() - 120, 5, 1.0f, 1.0f, 0.9f, word6);
+        textManager->loadText(occupant, this->ubuntuFont, glm::vec2(50, globals.getDisplayHeight() - 120), glm::vec3(1.0f, 1.0f, 0.9f), 5, word6);
         textManager->drawText(word6);
         
         window->presentNextFrame();
