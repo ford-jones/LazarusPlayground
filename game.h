@@ -26,6 +26,7 @@ class Game
 
         float moveX, moveZ;
         float turnX, turnY;
+        float scale;
         
         const char** errorMessage;
 
@@ -57,7 +58,7 @@ class Game
         Lazarus::MeshManager::Mesh sword;
         Lazarus::MeshManager::Mesh earth;
         Lazarus::MeshManager::Mesh metaball;
-        // Lazarus::MeshManager::Mesh monkey;
+        Lazarus::MeshManager::Mesh monkey;
 
         int32_t morpheusFont;
         int32_t ubuntuFont;
@@ -68,4 +69,6 @@ class Game
         Lazarus::TextManager::Text word4;
         Lazarus::TextManager::Text word5;
         Lazarus::TextManager::Text word6;
+
+        std::string previousKey;
 };

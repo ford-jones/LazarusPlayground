@@ -12,6 +12,7 @@ Game::Game()
     turnY = 0.0f;
     moveX = 0.0f;
     moveZ = 0.0f;
+    scale = 1.0f;
 
     skyBox = {};
     fog = {};
@@ -29,10 +30,10 @@ Game::Game()
 
 void Game::init()
 {
-    globals.setLaunchInFullscreen(true);
-    globals.setVsyncDisabled(true);
+    // globals.setLaunchInFullscreen(true);
+    // globals.setVsyncDisabled(true);
     
-    window = std::make_unique<Lazarus::WindowManager>("Lazarus Engine");
+    window = std::make_unique<Lazarus::WindowManager>("Lazarus Engine", 1000, 800);
     
     window->createWindow();
     window->eventsInit();
@@ -83,6 +84,7 @@ void Game::loadAssets()
     floors              = meshBuilder->create3DAsset("assets/mesh/floors.obj", "assets/material/floors.mtl", "assets/images/floors.png");
     walls               = meshBuilder->create3DAsset("assets/mesh/walls.obj", "assets/material/walls.mtl", "assets/images/walls.png", true);
     sword               = meshBuilder->create3DAsset("assets/mesh/sword.obj", "assets/material/sword.mtl");
+    // sword               = meshBuilder->createCube(1.0f, "assets/images/crosshair.png");
     metaball            = meshBuilder->create3DAsset("assets/mesh/metaball.glb");
 };
 
@@ -142,8 +144,7 @@ void Game::start()
         fog.viewpoint = glm::vec3(camera.position.x, camera.position.y, camera.position.z);
         worldBuilder->loadFog(fog);
         worldBuilder->drawSkyBox(skyBox, camera);
-        
-        
+    
         /*skull*/
         meshBuilder->loadMesh(skull);
         meshBuilder->drawMesh(skull);
@@ -162,21 +163,22 @@ void Game::start()
         /*metaball*/
         meshBuilder->loadMesh(metaball);
         meshBuilder->drawMesh(metaball);
-        // /*monkey*/
+        /*monkey*/
         // meshBuilder->loadMesh(monkey);
         // meshBuilder->drawMesh(monkey);
         
         transformer.translateMeshAsset(sword, (0.5f / 10), 0.0f, 0.0f);
         transformer.rotateMeshAsset(sword, 0.0f, 1.0f, 0.0f);
         transformer.rotateMeshAsset(earth, 0.0f, -0.7f, 0.0f);
+        transformer.scaleMeshAsset(skull, scale, scale, scale);
         
         /*text*/
         textManager->loadText("Lazarus Engine", this->morpheusFont, glm::vec2(((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80)), glm::vec3(0.6f, 0.0f, 0.0f), 10, this->word1);
         textManager->drawText(word1);
         
-        std::string cameraX     = std::string("Camera-X: ").append(std::to_string(camera.position.x));
-        std::string cameraY     = std::string("Camera-Y: ").append(std::to_string(camera.position.y));
-        std::string cameraZ     = std::string("Camera-Z: ").append(std::to_string(camera.position.z));
+        std::string cameraX     = std::string("Sword-X: ").append(std::to_string(sword.direction.x));
+        std::string cameraY     = std::string("Sword-Y: ").append(std::to_string(sword.direction.y));
+        std::string cameraZ     = std::string("Sword-Z: ").append(std::to_string(sword.direction.z));
         std::string fps         = std::string("FPS: ").append(std::to_string(static_cast<int>(window->framesPerSecond)));
         std::string occupant    = std::string("Select ID: ").append(std::to_string(cameraBuilder->getPixelOccupant(window->mousePositionX, window->mousePositionY)));
         
@@ -241,14 +243,28 @@ void Game::keyCapture(string key)
 		{
 			turnY += 2.0f;
 		}
+        else if(key == "f" && previousKey != "f")
+        {
+            window->toggleFullscreen();
+        }
+        else if(key == "z")
+        {
+            scale += 0.2f;
+        }
+        else if(key == "x")
+        {
+            scale -= 0.2f;
+        }
 		else 
 		{
 			moveX = 0.0f;
 			moveZ = 0.0f;
 		};
-
+        
         if(turnX > 360.0f || turnX < -360)
         {
             turnX = 0;
         };
+
+        previousKey = key;
 };
