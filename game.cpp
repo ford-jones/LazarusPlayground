@@ -80,11 +80,10 @@ void Game::loadAssets()
     // std::cout << "Elapsed time: " << elapsed_ms.count() << std::endl;
     
     earth               = meshBuilder->create3DAsset("assets/mesh/earth.glb");
-    skull               = meshBuilder->create3DAsset("assets/mesh/skull.obj", "assets/material/skull.mtl", "assets/images/skull.png", true);
-    floors              = meshBuilder->create3DAsset("assets/mesh/floors.obj", "assets/material/floors.mtl", "assets/images/floors.png");
-    walls               = meshBuilder->create3DAsset("assets/mesh/walls.obj", "assets/material/walls.mtl", "assets/images/walls.png", true);
+    skull               = meshBuilder->create3DAsset("assets/mesh/skull.obj", "assets/material/skull.mtl", true);
+    floors              = meshBuilder->create3DAsset("assets/mesh/floors.obj", "assets/material/floors.mtl");
+    walls               = meshBuilder->create3DAsset("assets/mesh/walls.obj", "assets/material/walls.mtl", true);
     sword               = meshBuilder->create3DAsset("assets/mesh/sword.obj", "assets/material/sword.mtl");
-    // sword               = meshBuilder->createCube(1.0f, "assets/images/crosshair.png");
     metaball            = meshBuilder->create3DAsset("assets/mesh/metaball.glb");
 };
 
