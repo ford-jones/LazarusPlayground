@@ -18,9 +18,11 @@ class Game
 
     public:
         void setupAudio();
-        void keyCapture(std::string key);
+        void keyCapture(uint32_t key);
 
-        int shaderProgram;
+        int32_t default_shader;
+        int32_t caustics_shader;
+
         int errorCode;
         int engineStatus;
 
@@ -42,6 +44,7 @@ class Game
 
         unique_ptr<Lazarus::WorldFX> worldBuilder;
         unique_ptr<Lazarus::MeshManager> meshBuilder;
+        unique_ptr<Lazarus::MeshManager> waterBuilder;
         
         Lazarus::WorldFX::SkyBox skyBox;
         Lazarus::WorldFX::Fog fog;
@@ -53,12 +56,13 @@ class Game
         Lazarus::LightManager::Light light2;
 
         Lazarus::MeshManager::Mesh skull;
-        Lazarus::MeshManager::Mesh walls;
-        Lazarus::MeshManager::Mesh floors;
+        Lazarus::MeshManager::Mesh terrain;
+        Lazarus::MeshManager::Mesh river;
         Lazarus::MeshManager::Mesh sword;
         Lazarus::MeshManager::Mesh earth;
         Lazarus::MeshManager::Mesh metaball;
-        Lazarus::MeshManager::Mesh monkey;
+
+        std::vector<Lazarus::MeshManager::Mesh> assets;
 
         int32_t morpheusFont;
         int32_t ubuntuFont;
@@ -70,5 +74,5 @@ class Game
         Lazarus::TextManager::Text word5;
         Lazarus::TextManager::Text word6;
 
-        std::string previousKey;
+        uint32_t previousKey;
 };
