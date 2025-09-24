@@ -47,8 +47,8 @@ void Game::init()
     
     window->loadConfig();
 
-    default_shader = shader.compileShaders();
-    caustics_shader = shader.compileShaders("assets/shaders/water.glsl");
+    shader.compileShaders(default_shader);
+    shader.compileShaders(caustics_shader, "assets/shaders/water.glsl");
 
     shader.setActiveShader(default_shader);
 
@@ -59,9 +59,21 @@ void Game::init()
     lightBuilder        = std::make_unique<Lazarus::LightManager>(default_shader);
     cameraBuilder       = std::make_unique<Lazarus::CameraManager>(default_shader);
 
-    light1              = lightBuilder->createLightSource(glm::vec3(10.0f, 10.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 10.0f);
-    light2              = lightBuilder->createLightSource(glm::vec3(-10.0f, 10.0f, -1.0f), glm::vec3(0.0f, 0.0f, 1.0f), 10.0f);
-    camera              = cameraBuilder->createPerspectiveCam(500.0f);
+    Lazarus::LightManager::LightConfig lightConfig = {};
+    lightConfig.position    = glm::vec3(10.0f, 10.0f, 1.0f);
+    lightConfig.color       = glm::vec3(1.0f, 0.0f, 0.0f);
+    lightConfig.brightness  = 10.0f;
+    lightBuilder->createLightSource(light1, lightConfig);
+
+    lightConfig = {};
+    lightConfig.position    = glm::vec3(-10.0f, 10.0f, -1.0f);
+    lightConfig.color       = glm::vec3(0.0f, 0.0f, 1.0f);
+    lightConfig.brightness  = 10.0f;
+    lightBuilder->createLightSource(light2, lightConfig);
+
+    Lazarus::CameraManager::CameraConfig cameraConfig = {};
+    cameraConfig.clippingDistance = 500.0f;
+    cameraBuilder->createPerspectiveCam(camera, cameraConfig);
 
     this->loadAssets();
     this->layoutScene();
@@ -73,18 +85,39 @@ void Game::loadAssets()
 {
     auto start = std::chrono::system_clock::now();
 
-    skyBox              = worldBuilder->createSkyBox("assets/images/skybox/pos_x.png", "assets/images/skybox/neg_x.png", "assets/images/skybox/neg_y.png", "assets/images/skybox/pos_y.png", "assets/images/skybox/pos_z.png", "assets/images/skybox/neg_z.png");
-    fog                 = worldBuilder->createFog(5.0, 90.0f, 0.3f, glm::vec3(0.5f, 0.5f, 0.5f));
+    worldBuilder->createSkyBox(skyBox, "assets/images/skybox/pos_x.png", "assets/images/skybox/neg_x.png", "assets/images/skybox/neg_y.png", "assets/images/skybox/pos_y.png", "assets/images/skybox/pos_z.png", "assets/images/skybox/neg_z.png");
+    worldBuilder->createFog(fog, 5.0, 90.0f, 0.3f, glm::vec3(0.5f, 0.5f, 0.5f));
 
     shader.setActiveShader(default_shader);
-    earth               = meshBuilder->create3DAsset("assets/mesh/earth.glb");
-    skull               = meshBuilder->create3DAsset("assets/mesh/skull.obj", "assets/material/skull.mtl", true);
-    terrain             = meshBuilder->create3DAsset("assets/mesh/town_square.glb");
-    sword               = meshBuilder->create3DAsset("assets/mesh/sword.obj", "assets/material/sword.mtl");
-    metaball            = meshBuilder->create3DAsset("assets/mesh/metaball.glb");
+
+    Lazarus::MeshManager::AssetConfig assetConfig = {};
+    assetConfig.meshPath = "assets/mesh/earth.glb";
+    meshBuilder->create3DAsset(earth, assetConfig);
+
+    assetConfig = {};
+    assetConfig.meshPath = "assets/mesh/skull.obj";
+    assetConfig.materialPath = "assets/material/skull.mtl";
+    assetConfig.selectable = true;
+    meshBuilder->create3DAsset(skull, assetConfig);
+    
+    assetConfig = {};
+    assetConfig.meshPath = "assets/mesh/town_square.glb";
+    meshBuilder->create3DAsset(terrain, assetConfig);
+
+    assetConfig = {};
+    assetConfig.meshPath = "assets/mesh/sword.obj";
+    assetConfig.materialPath = "assets/material/sword.mtl";
+    meshBuilder->create3DAsset(sword, assetConfig);
+
+    assetConfig = {};
+    assetConfig.meshPath = "assets/mesh/metaball.glb";
+    meshBuilder->create3DAsset(metaball, assetConfig);
     
     shader.setActiveShader(caustics_shader);
-    river               = waterBuilder->create3DAsset("assets/mesh/river.glb");
+
+    assetConfig = {};
+    assetConfig.meshPath = "assets/mesh/river.glb";
+    waterBuilder->create3DAsset(river, assetConfig);
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_ms = (end - start);
@@ -97,15 +130,52 @@ void Game::loadText()
     shader.setActiveShader(default_shader);
     textManager->initialise();
     
-    this->ubuntuFont = textManager->extendFontStack("assets/fonts/Ubuntu-R.ttf", 150);
-    this->morpheusFont = textManager->extendFontStack("assets/fonts/MORPHEUS.TTF", 50);
+    textManager->extendFontStack(this->ubuntuFont, "assets/fonts/Ubuntu-R.ttf", 150);
+    textManager->extendFontStack(this->morpheusFont, "assets/fonts/MORPHEUS.TTF", 50);
+    // ubuntuFont = morpheusFont;
 
-    this->word1 = textManager->createText("Lazarus Engine", this->morpheusFont, glm::vec2(((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80)), glm::vec3(0.6f, 0.0f, 0.0f), 10);
-    this->word2 = textManager->createText(" ", this->morpheusFont, glm::vec2(50, 50), glm::vec3(1.0f, 1.0f, 0.9f), 5);
-    this->word3 = textManager->createText(" ", this->morpheusFont, glm::vec2(50, 100), glm::vec3(1.0f, 1.0f, 0.9f), 5);
-    this->word4 = textManager->createText(" ", this->morpheusFont, glm::vec2(50, 150), glm::vec3(1.0f, 1.0f, 0.9f), 5);
-    this->word5 = textManager->createText(" ", this->ubuntuFont, glm::vec2(50, globals.getDisplayHeight() - 80), glm::vec3(1.0f, 1.0f, 0.9f));
-    this->word6 = textManager->createText(" ", this->ubuntuFont, glm::vec2(50, globals.getDisplayHeight() - 120), glm::vec3(1.0f, 1.0f, 0.9f));
+    Lazarus::TextManager::TextConfig textConfig = {};
+    textConfig.targetString = "Lazarus Engine";
+    textConfig.fontIndex = this->morpheusFont;
+    textConfig.location = glm::vec2(((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80));
+    textConfig.color = glm::vec3(0.6f, 0.0f, 0.0f);
+    textConfig.letterSpacing = 10;
+    textManager->createText(this->word1, textConfig);
+
+    textConfig = {};
+    textConfig.fontIndex = this->morpheusFont;
+    textConfig.location = glm::vec2(50, 50);
+    textConfig.color = glm::vec3(1.0f, 1.0f, 0.8f);
+    textConfig.letterSpacing = 5;
+    textManager->createText(this->word2, textConfig);
+
+    textConfig = {};
+    textConfig.fontIndex = this->morpheusFont;
+    textConfig.location = glm::vec2(50, 100);
+    textConfig.color = glm::vec3(1.0f, 1.0f, 0.8f);
+    textConfig.letterSpacing = 5;
+    textManager->createText(this->word3, textConfig);
+
+    textConfig = {};
+    textConfig.fontIndex = this->morpheusFont;
+    textConfig.location = glm::vec2(50, 150);
+    textConfig.color = glm::vec3(1.0f, 1.0f, 0.8f);
+    textConfig.letterSpacing = 5;
+    textManager->createText(this->word4, textConfig);
+
+    textConfig = {};
+    textConfig.fontIndex = this->ubuntuFont;
+    textConfig.location = glm::vec2(50, globals.getDisplayHeight() - 80);
+    textConfig.color = glm::vec3(1.0f, 1.0f, 0.8f);
+    textConfig.letterSpacing = 5;
+    textManager->createText(this->word5, textConfig);
+    
+    // textConfig = {};
+    // textConfig.fontIndex = this->ubuntuFont;
+    // textConfig.location = glm::vec2(50, globals.getDisplayHeight() - 120);
+    // textConfig.color = glm::vec3(1.0f, 1.0f, 0.8f);
+    // textConfig.letterSpacing = 5;
+    // textManager->createText(this->word6, textConfig);
 };
 
 void Game::layoutScene()
@@ -122,7 +192,12 @@ void Game::layoutScene()
 
 void Game::setupAudio()
 {
-    springWaltz = soundManager->createAudio("assets/sound/springWaltz.mp3", true, 0);
+    Lazarus::AudioManager::AudioConfig audioConfig = {};
+    audioConfig.filepath = "assets/sound/springWaltz.mp3";
+    audioConfig.is3D = true;
+    audioConfig.loopCount = 0;
+
+    soundManager->createAudio(springWaltz, audioConfig);
     soundManager->loadAudio(springWaltz);
     soundManager->playAudio(springWaltz); 
 };
@@ -192,11 +267,14 @@ void Game::start()
         textManager->loadText(this->word1);
         textManager->drawText(word1);
         
-        word2.targetString     = std::string("Camera-X: ").append(std::to_string(camera.direction.x));
-        word3.targetString     = std::string("Camera-Y: ").append(std::to_string(camera.direction.y));
-        word4.targetString     = std::string("Camera-Z: ").append(std::to_string(camera.direction.z));
-        word5.targetString     = std::string("FPS: ").append(std::to_string(static_cast<int>(window->framesPerSecond)));
-        word6.targetString     = std::string("Select ID: ").append(std::to_string(cameraBuilder->getPixelOccupant(window->mousePositionX, window->mousePositionY)));
+        uint8_t occupant = 0;
+        cameraBuilder->getPixelOccupant(window->mousePositionX, window->mousePositionY, occupant);
+
+        word2.config.targetString     = std::string("Camera-X: ").append(std::to_string(camera.direction.x));
+        word3.config.targetString     = std::string("Camera-Y: ").append(std::to_string(camera.direction.y));
+        word4.config.targetString     = std::string("Camera-Z: ").append(std::to_string(camera.direction.z));
+        word5.config.targetString     = std::string("FPS: ").append(std::to_string(static_cast<int>(window->framesPerSecond)));
+        // word6.config.targetString     = std::string("Select ID: ").append(std::to_string(occupant));
         
         textManager->loadText(word2);
         textManager->drawText(word2);
@@ -210,18 +288,18 @@ void Game::start()
         textManager->loadText(word5);
         textManager->drawText(word5);
 
-        textManager->loadText(word6);
-        textManager->drawText(word6);
+        // textManager->loadText(word6);
+        // textManager->drawText(word6);
         
         window->presentNextFrame();
             
-        engineStatus = globals.getExecutionState();
+        // engineStatus = globals.getExecutionState();
         
-        if(engineStatus != LAZARUS_OK)
-        {
-            std::cout << "Engine status: " << engineStatus << std::endl;
-            break;
-        }
+        // if(engineStatus != LAZARUS_OK)
+        // {
+        //     std::cout << "Engine status: " << engineStatus << std::endl;
+        //     break;
+        // }
     };
 };
 
