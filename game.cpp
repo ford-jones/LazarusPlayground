@@ -24,7 +24,7 @@ Game::Game()
 void Game::init()
 {
     globals.setLaunchInFullscreen(true);
-    globals.setVsyncDisabled(true);
+    // globals.setVsyncDisabled(true);
     
     window = std::make_unique<Lazarus::WindowManager>("Lazarus Engine", 1000, 800);
     
@@ -78,14 +78,15 @@ void Game::loadAssets()
     auto start = std::chrono::system_clock::now();
 
     world_builder->createSkyBox(skybox, "assets/images/skybox/pos_x.png", "assets/images/skybox/neg_x.png", "assets/images/skybox/neg_y.png", "assets/images/skybox/pos_y.png", "assets/images/skybox/pos_z.png", "assets/images/skybox/neg_z.png");
-    world_builder->createFog(fog, 5.0, 90.0f, 0.3f, glm::vec3(0.5f, 0.5f, 0.5f));
+    world_builder->createFog(fog, 10.0, 90.0f, 0.3f, glm::vec3(0.5f, 0.5f, 0.5f));
 
     shader_manager.setActiveShader(default_shader);
 
     Lazarus::MeshManager::AssetConfig assetConfig = {};
     assetConfig.meshPath = "assets/mesh/earth.glb";
     mesh_builder->create3DAsset(earth, assetConfig);
-    transform.translateMeshAsset(earth, 0.0f, 13.0f, 0.0f);
+    transform.translateMeshAsset(earth, 0.0f, 20.0f, 0.0f);
+    transform.scaleMeshAsset(earth, 4.0f, 4.0f, 4.0f);
 
     assetConfig = {};
     assetConfig.meshPath = "assets/mesh/town_square.glb";
