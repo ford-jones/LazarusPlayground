@@ -131,13 +131,15 @@ void Game::loadText()
 void Game::setupAudio()
 {
     Lazarus::AudioManager::AudioConfig audioConfig = {};
-    audioConfig.filepath = "assets/sound/spring_waltz.mp3";
+    audioConfig.filepath = "assets/sound/springWaltz.mp3";
     audioConfig.is3D = true;
     audioConfig.loopCount = 0;
 
     sound_manager->createAudio(spring_waltz, audioConfig);
+    
     sound_manager->loadAudio(spring_waltz);
     sound_manager->playAudio(spring_waltz); 
+    sound_manager->updateSourceLocation(spring_waltz, earth.position);
 };
 
 void Game::start()
@@ -197,6 +199,9 @@ void Game::start()
         uint8_t occupant = 0;
         camera_builder->getPixelOccupant(window->mousePositionX, window->mousePositionY, occupant);
         frame_counter.config.targetString     = std::string("FPS: ").append(std::to_string(static_cast<int>(window->framesPerSecond)));
+
+        text_manager->loadText(this->frame_counter);
+        text_manager->drawText(this->frame_counter);
         
         window->presentNextFrame();
     };
