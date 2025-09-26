@@ -55,14 +55,15 @@ class Game
         Lazarus::LightManager::Light light1;
         Lazarus::LightManager::Light light2;
 
-        Lazarus::MeshManager::Mesh skull;
-        Lazarus::MeshManager::Mesh terrain;
-        Lazarus::MeshManager::Mesh river;
-        Lazarus::MeshManager::Mesh sword;
-        Lazarus::MeshManager::Mesh earth;
-        Lazarus::MeshManager::Mesh metaball;
+        Lazarus::MeshManager::Mesh *skull;
+        // Lazarus::MeshManager::Mesh terrain;
+        Lazarus::MeshManager::Mesh *river;
+        Lazarus::MeshManager::Mesh *sword;
+        Lazarus::MeshManager::Mesh *earth;
+        // Lazarus::MeshManager::Mesh metaball;
 
-        std::vector<Lazarus::MeshManager::Mesh> assets;
+        std::map<std::string, Lazarus::MeshManager::Mesh> glbAssets = {};
+        std::map<std::string, Lazarus::MeshManager::Mesh> wfAssets = {};
 
         uint32_t morpheusFont;
         uint32_t ubuntuFont;

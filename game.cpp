@@ -90,34 +90,50 @@ void Game::loadAssets()
 
     shader.setActiveShader(default_shader);
 
-    Lazarus::MeshManager::AssetConfig assetConfig = {};
-    assetConfig.meshPath = "assets/mesh/earth.glb";
-    meshBuilder->create3DAsset(earth, assetConfig);
+    std::vector<std::filesystem::directory_entry> assets = {};
 
-    assetConfig = {};
-    assetConfig.meshPath = "assets/mesh/skull.obj";
-    assetConfig.materialPath = "assets/material/skull.mtl";
-    assetConfig.selectable = true;
-    meshBuilder->create3DAsset(skull, assetConfig);
+    glbAssets = {};
+    wfAssets = {};
+
+    std::filesystem::path meshDirectory = std::filesystem::current_path().append("assets/mesh/");
+    for(auto &filename : std::filesystem::directory_iterator(meshDirectory))
+    {
+        assets.push_back(filename);
+    };
+
+    for(size_t i = 0; i < assets.size(); i++)
+    {
+        std::filesystem::path p = assets[i].path();
+        
+        Lazarus::MeshManager::Mesh m = {};
+        Lazarus::MeshManager::AssetConfig assetConfig = {};
+
+        std::string thing = meshDirectory;
+
+        if(strcmp(p.extension().c_str(), ".glb") == 0)
+        {
+            assetConfig.meshPath = thing.append(p.filename().string());
+            assetConfig.name = p.filename().replace_extension("").string();
     
-    assetConfig = {};
-    assetConfig.meshPath = "assets/mesh/town_square.glb";
-    meshBuilder->create3DAsset(terrain, assetConfig);
+            meshBuilder->create3DAsset(m, assetConfig);
+            glbAssets.insert(std::pair<std::string, Lazarus::MeshManager::Mesh>(assetConfig.name, m));
+        }
+        else if(strcmp(p.extension().c_str(), ".obj") == 0)
+        {
+            std::filesystem::path materialDirectory = std::filesystem::current_path().append("assets/material/");
 
-    assetConfig = {};
-    assetConfig.meshPath = "assets/mesh/sword.obj";
-    assetConfig.materialPath = "assets/material/sword.mtl";
-    meshBuilder->create3DAsset(sword, assetConfig);
+            assetConfig.name = p.filename().replace_extension("").string();
+            assetConfig.meshPath = thing.append(p.filename().string());
+            assetConfig.materialPath = materialDirectory.append(p.filename().replace_extension("mtl").string());
 
-    assetConfig = {};
-    assetConfig.meshPath = "assets/mesh/metaball.glb";
-    meshBuilder->create3DAsset(metaball, assetConfig);
-    
-    shader.setActiveShader(caustics_shader);
+            meshBuilder->create3DAsset(m, assetConfig);
+            wfAssets.insert(std::pair<std::string, Lazarus::MeshManager::Mesh>(assetConfig.name, m));
+        };
+    };
 
-    assetConfig = {};
-    assetConfig.meshPath = "assets/mesh/river.glb";
-    waterBuilder->create3DAsset(river, assetConfig);
+    earth = &glbAssets["earth"];
+    sword = &wfAssets["sword"];
+    skull = &wfAssets["skull"];
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_ms = (end - start);
@@ -132,7 +148,6 @@ void Game::loadText()
     
     textManager->extendFontStack(this->ubuntuFont, "assets/fonts/Ubuntu-R.ttf", 150);
     textManager->extendFontStack(this->morpheusFont, "assets/fonts/MORPHEUS.TTF", 50);
-    // ubuntuFont = morpheusFont;
 
     Lazarus::TextManager::TextConfig textConfig = {};
     textConfig.targetString = "Lazarus Engine";
@@ -182,12 +197,12 @@ void Game::layoutScene()
 {
     transformer.translateCameraAsset(camera, 0.0f, 20.0f, 0.0f);
 
-    transformer.translateMeshAsset(sword, 0.0f, 11.0f, 3.0f);
-    transformer.translateMeshAsset(earth, 0.0f, 13.0f, 0.0f);
-    transformer.translateMeshAsset(skull, 0.0f, 10.0f, 0.0f);
-    transformer.translateMeshAsset(metaball, 20.0f, 30.0f, 0.0f);
+    transformer.translateMeshAsset(*sword, 0.0f, 11.0f, 3.0f);
+    transformer.translateMeshAsset(*earth, 0.0f, 13.0f, 0.0f);
+    transformer.translateMeshAsset(*skull, 0.0f, 10.0f, 0.0f);
+    // transformer.translateMeshAsset(metaball, 20.0f, 30.0f, 0.0f);
 
-    transformer.scaleMeshAsset(metaball, 6.0f, 6.0f, 6.0f);
+    // transformer.scaleMeshAsset(metaball, 6.0f, 6.0f, 6.0f);
 };
 
 void Game::setupAudio()
@@ -231,21 +246,37 @@ void Game::start()
         worldBuilder->loadFog(fog);
         worldBuilder->drawSkyBox(skyBox, camera);
     
-        /*skull*/
-        meshBuilder->loadMesh(skull);
-        meshBuilder->drawMesh(skull);
-        /*terrain*/
-        meshBuilder->loadMesh(terrain);
-        meshBuilder->drawMesh(terrain);
-        /*earth*/
-        meshBuilder->loadMesh(earth);
-        meshBuilder->drawMesh(earth);
-        /*sword*/
-        meshBuilder->loadMesh(sword);
-        meshBuilder->drawMesh(sword);
-        /*metaball*/
-        meshBuilder->loadMesh(metaball);
-        meshBuilder->drawMesh(metaball);
+        // /*skull*/
+        // meshBuilder->loadMesh(skull);
+        // meshBuilder->drawMesh(skull);
+        // /*terrain*/
+        // meshBuilder->loadMesh(terrain);
+        // meshBuilder->drawMesh(terrain);
+        // /*earth*/
+        // meshBuilder->loadMesh(earth);
+        // meshBuilder->drawMesh(earth);
+        // /*sword*/
+        // meshBuilder->loadMesh(sword);
+        // meshBuilder->drawMesh(sword);
+        // /*metaball*/
+        // meshBuilder->loadMesh(metaball);
+        // meshBuilder->drawMesh(metaball);
+
+        for(auto &i : wfAssets)
+        {
+            Lazarus::MeshManager::Mesh m = i.second;
+
+            meshBuilder->loadMesh(m);
+            meshBuilder->drawMesh(m);
+        };
+
+        for(auto &i : glbAssets)
+        {
+            Lazarus::MeshManager::Mesh m = i.second;
+
+            meshBuilder->loadMesh(m);
+            meshBuilder->drawMesh(m);
+        };
 
         shader.setActiveShader(caustics_shader);
         shader.uploadUniform("time", &window->elapsedTime);
@@ -253,15 +284,15 @@ void Game::start()
         cameraBuilder->loadCamera(camera);
         worldBuilder->loadFog(fog, caustics_shader);
 
-        /*river*/
-        waterBuilder->loadMesh(river);
-        waterBuilder->drawMesh(river);
+        // /*river*/
+        // waterBuilder->loadMesh(river);
+        // waterBuilder->drawMesh(river);
         
         shader.setActiveShader(default_shader);
-        transformer.translateMeshAsset(sword, (0.5f / 10), 0.0f, 0.0f);
-        transformer.rotateMeshAsset(sword, 0.0f, 1.0f, 0.0f);
-        transformer.rotateMeshAsset(earth, 0.0f, -0.7f, 0.0f);
-        transformer.scaleMeshAsset(skull, scale, scale, scale);
+        transformer.translateMeshAsset(*sword, (0.5f / 10), 0.0f, 0.0f);
+        transformer.rotateMeshAsset(*sword, 0.0f, 1.0f, 0.0f);
+        transformer.rotateMeshAsset(*earth, 0.0f, -0.7f, 0.0f);
+        transformer.scaleMeshAsset(*skull, scale, scale, scale);
         
         /*text*/
         textManager->loadText(this->word1);
