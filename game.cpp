@@ -2,11 +2,26 @@
 
 Game::Game()
 {
-    soundManager = std::make_unique<Lazarus::AudioManager>();
     globals = Lazarus::GlobalsManager();
-    window = nullptr;
-    textManager = nullptr;
+    soundManager = std::make_unique<Lazarus::AudioManager>();
+    window          = nullptr;
+    textManager     = nullptr;
+    cameraBuilder   = nullptr;
+    lightBuilder    = nullptr;
+    worldBuilder    = nullptr;
+    meshBuilder     = nullptr;
+    status_x        = nullptr;
+    status_y        = nullptr;
+    status_z        = nullptr;
+    frame_counter   = nullptr;
+    selection       = nullptr;
+    
     springWaltz = {};
+    assets = {};
+
+    sword    = nullptr;
+    earth    = nullptr;
+    metaball = nullptr;
 
     turnX = 0.0f;
     turnY = 0.0f;
@@ -19,13 +34,6 @@ Game::Game()
 
     this->morpheusFont = 0;
     this->ubuntuFont = 0;
-
-    word1 = {};
-    word2 = {};
-    word3 = {};
-    word4 = {};
-    word5 = {};
-    word6 = {};
 };
 
 void Game::init()
@@ -90,50 +98,50 @@ void Game::loadAssets()
 
     shader.setActiveShader(default_shader);
 
-    std::vector<std::filesystem::directory_entry> assets = {};
+    std::vector<std::filesystem::directory_entry> files = {};
+    assets = {};
 
-    glbAssets = {};
-    wfAssets = {};
-
+    std::filesystem::path materialDirectory = std::filesystem::current_path().append("assets/material/");
     std::filesystem::path meshDirectory = std::filesystem::current_path().append("assets/mesh/");
+
     for(auto &filename : std::filesystem::directory_iterator(meshDirectory))
     {
-        assets.push_back(filename);
+        files.push_back(filename);
     };
 
-    for(size_t i = 0; i < assets.size(); i++)
+    for(size_t i = 0; i < files.size(); i++)
     {
-        std::filesystem::path p = assets[i].path();
+        std::filesystem::path p = files[i].path();
         
         Lazarus::MeshManager::Mesh m = {};
         Lazarus::MeshManager::AssetConfig assetConfig = {};
 
-        std::string thing = meshDirectory;
+        std::string meshes = meshDirectory;
+        std::string materials = materialDirectory;
 
-        if(strcmp(p.extension().c_str(), ".glb") == 0)
+        assetConfig.name = p.filename().replace_extension("").string();
+        
+        if(assetConfig.name == "river") continue;
+        
+        assetConfig.meshPath = meshes.append(p.filename().string());
+
+        if(strcmp(p.extension().c_str(), ".obj") == 0)
         {
-            assetConfig.meshPath = thing.append(p.filename().string());
-            assetConfig.name = p.filename().replace_extension("").string();
-    
-            meshBuilder->create3DAsset(m, assetConfig);
-            glbAssets.insert(std::pair<std::string, Lazarus::MeshManager::Mesh>(assetConfig.name, m));
-        }
-        else if(strcmp(p.extension().c_str(), ".obj") == 0)
-        {
-            std::filesystem::path materialDirectory = std::filesystem::current_path().append("assets/material/");
-
-            assetConfig.name = p.filename().replace_extension("").string();
-            assetConfig.meshPath = thing.append(p.filename().string());
-            assetConfig.materialPath = materialDirectory.append(p.filename().replace_extension("mtl").string());
-
-            meshBuilder->create3DAsset(m, assetConfig);
-            wfAssets.insert(std::pair<std::string, Lazarus::MeshManager::Mesh>(assetConfig.name, m));
+            assetConfig.materialPath = materials.append(p.filename().replace_extension("mtl").string());
         };
+        meshBuilder->create3DAsset(m, assetConfig);
+        assets.insert(std::pair<std::string, Lazarus::MeshManager::Mesh>(assetConfig.name, m));
     };
 
-    earth = &glbAssets["earth"];
-    sword = &wfAssets["sword"];
-    skull = &wfAssets["skull"];
+    Lazarus::MeshManager::AssetConfig assetConfig = {};
+    assetConfig.name = "river";
+    assetConfig.meshPath = "assets/mesh/river.glb";
+    waterBuilder->create3DAsset(river, assetConfig);
+
+    earth       = &assets["earth"];
+    sword       = &assets["sword"];
+    skull       = &assets["skull"];
+    metaball    = &assets["metaball"];
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_ms = (end - start);
@@ -143,54 +151,44 @@ void Game::loadAssets()
 
 void Game::loadText()
 {
+    layout = {};
+
     shader.setActiveShader(default_shader);
     textManager->initialise();
     
-    textManager->extendFontStack(this->ubuntuFont, "assets/fonts/Ubuntu-R.ttf", 150);
-    textManager->extendFontStack(this->morpheusFont, "assets/fonts/MORPHEUS.TTF", 50);
+    textManager->extendFontStack(this->ubuntuFont, "assets/fonts/times.ttf", 50);
+    textManager->extendFontStack(this->morpheusFont, "assets/fonts/MORPHEUS.TTF", 80);
 
-    Lazarus::TextManager::TextConfig textConfig = {};
-    textConfig.targetString = "Lazarus Engine";
-    textConfig.fontIndex = this->morpheusFont;
-    textConfig.location = glm::vec2(((globals.getDisplayWidth() / 2) - 350), (globals.getDisplayHeight() - 80));
-    textConfig.color = glm::vec3(0.6f, 0.0f, 0.0f);
-    textConfig.letterSpacing = 10;
-    textManager->createText(this->word1, textConfig);
+    std::vector<std::string> targetStrings = {
+        "Lazarus Engine", "Camera-X: ", "Camera-Y: ", "Camera-Z: ", "FPS: ", "Select-ID: "
+    };
 
-    textConfig = {};
-    textConfig.fontIndex = this->morpheusFont;
-    textConfig.location = glm::vec2(50, 50);
-    textConfig.color = glm::vec3(1.0f, 1.0f, 0.8f);
-    textConfig.letterSpacing = 5;
-    textManager->createText(this->word2, textConfig);
+    for(uint8_t i = 0; i < targetStrings.size(); i ++)
+    {
+        Lazarus::TextManager::Text text = {};
+        Lazarus::TextManager::TextConfig textConfig = {};
+        
+        textConfig.targetString = targetStrings[i];
+        textConfig.fontIndex = this->ubuntuFont;
+        textConfig.location = glm::vec2(20.0f, (i * 50.0f));
+        textConfig.color = glm::vec3(1.0f, 1.0f, 1.0f);
+        textConfig.letterSpacing = 5;
 
-    textConfig = {};
-    textConfig.fontIndex = this->morpheusFont;
-    textConfig.location = glm::vec2(50, 100);
-    textConfig.color = glm::vec3(1.0f, 1.0f, 0.8f);
-    textConfig.letterSpacing = 5;
-    textManager->createText(this->word3, textConfig);
+        textManager->createText(text, textConfig);
+        layout.push_back(text);
+    };
 
-    textConfig = {};
-    textConfig.fontIndex = this->morpheusFont;
-    textConfig.location = glm::vec2(50, 150);
-    textConfig.color = glm::vec3(1.0f, 1.0f, 0.8f);
-    textConfig.letterSpacing = 5;
-    textManager->createText(this->word4, textConfig);
+    title           = &layout[0];
+    status_x        = &layout[1];
+    status_y        = &layout[2];
+    status_z        = &layout[3];
+    frame_counter   = &layout[4];
+    selection       = &layout[5];
 
-    textConfig = {};
-    textConfig.fontIndex = this->ubuntuFont;
-    textConfig.location = glm::vec2(50, globals.getDisplayHeight() - 80);
-    textConfig.color = glm::vec3(1.0f, 1.0f, 0.8f);
-    textConfig.letterSpacing = 5;
-    textManager->createText(this->word5, textConfig);
-    
-    // textConfig = {};
-    // textConfig.fontIndex = this->ubuntuFont;
-    // textConfig.location = glm::vec2(50, globals.getDisplayHeight() - 120);
-    // textConfig.color = glm::vec3(1.0f, 1.0f, 0.8f);
-    // textConfig.letterSpacing = 5;
-    // textManager->createText(this->word6, textConfig);
+    title->config.fontIndex = this->morpheusFont;
+    title->config.color = glm::vec3(0.6f, 0.0f, 0.0f);
+    title->config.location = glm::vec2(((globals.getDisplayWidth() / 2) - 380), (globals.getDisplayHeight() - 80));
+    title->config.letterSpacing = 10;
 };
 
 void Game::layoutScene()
@@ -200,9 +198,9 @@ void Game::layoutScene()
     transformer.translateMeshAsset(*sword, 0.0f, 11.0f, 3.0f);
     transformer.translateMeshAsset(*earth, 0.0f, 13.0f, 0.0f);
     transformer.translateMeshAsset(*skull, 0.0f, 10.0f, 0.0f);
-    // transformer.translateMeshAsset(metaball, 20.0f, 30.0f, 0.0f);
+    transformer.translateMeshAsset(*metaball, 20.0f, 30.0f, 0.0f);
 
-    // transformer.scaleMeshAsset(metaball, 6.0f, 6.0f, 6.0f);
+    transformer.scaleMeshAsset(*metaball, 6.0f, 6.0f, 6.0f);
 };
 
 void Game::setupAudio()
@@ -245,32 +243,8 @@ void Game::start()
         fog.viewpoint = camera.position;
         worldBuilder->loadFog(fog);
         worldBuilder->drawSkyBox(skyBox, camera);
-    
-        // /*skull*/
-        // meshBuilder->loadMesh(skull);
-        // meshBuilder->drawMesh(skull);
-        // /*terrain*/
-        // meshBuilder->loadMesh(terrain);
-        // meshBuilder->drawMesh(terrain);
-        // /*earth*/
-        // meshBuilder->loadMesh(earth);
-        // meshBuilder->drawMesh(earth);
-        // /*sword*/
-        // meshBuilder->loadMesh(sword);
-        // meshBuilder->drawMesh(sword);
-        // /*metaball*/
-        // meshBuilder->loadMesh(metaball);
-        // meshBuilder->drawMesh(metaball);
 
-        for(auto &i : wfAssets)
-        {
-            Lazarus::MeshManager::Mesh m = i.second;
-
-            meshBuilder->loadMesh(m);
-            meshBuilder->drawMesh(m);
-        };
-
-        for(auto &i : glbAssets)
+        for(auto &i : assets)
         {
             Lazarus::MeshManager::Mesh m = i.second;
 
@@ -284,9 +258,9 @@ void Game::start()
         cameraBuilder->loadCamera(camera);
         worldBuilder->loadFog(fog, caustics_shader);
 
-        // /*river*/
-        // waterBuilder->loadMesh(river);
-        // waterBuilder->drawMesh(river);
+        /*river*/
+        waterBuilder->loadMesh(river);
+        waterBuilder->drawMesh(river);
         
         shader.setActiveShader(default_shader);
         transformer.translateMeshAsset(*sword, (0.5f / 10), 0.0f, 0.0f);
@@ -294,43 +268,26 @@ void Game::start()
         transformer.rotateMeshAsset(*earth, 0.0f, -0.7f, 0.0f);
         transformer.scaleMeshAsset(*skull, scale, scale, scale);
         
-        /*text*/
-        textManager->loadText(this->word1);
-        textManager->drawText(word1);
         
+        /*text*/
         uint8_t occupant = 0;
         cameraBuilder->getPixelOccupant(window->mousePositionX, window->mousePositionY, occupant);
+        
+        status_x->config.targetString       = std::string("Camera-X: ").append(std::to_string(camera.direction.x));
+        status_y->config.targetString       = std::string("Camera-Y: ").append(std::to_string(camera.direction.y));
+        status_z->config.targetString       = std::string("Camera-Z: ").append(std::to_string(camera.direction.z));
+        frame_counter->config.targetString  = std::string("FPS: ").append(std::to_string(static_cast<int>(window->framesPerSecond)));
+        selection->config.targetString      = std::string("Select ID: ").append(std::to_string(occupant));
 
-        word2.config.targetString     = std::string("Camera-X: ").append(std::to_string(camera.direction.x));
-        word3.config.targetString     = std::string("Camera-Y: ").append(std::to_string(camera.direction.y));
-        word4.config.targetString     = std::string("Camera-Z: ").append(std::to_string(camera.direction.z));
-        word5.config.targetString     = std::string("FPS: ").append(std::to_string(static_cast<int>(window->framesPerSecond)));
-        // word6.config.targetString     = std::string("Select ID: ").append(std::to_string(occupant));
-        
-        textManager->loadText(word2);
-        textManager->drawText(word2);
-        
-        textManager->loadText(word3);
-        textManager->drawText(word3);
-        
-        textManager->loadText(word4);
-        textManager->drawText(word4);
-        
-        textManager->loadText(word5);
-        textManager->drawText(word5);
+        for(size_t i = 0; i < layout.size(); i++)
+        {
+            Lazarus::TextManager::Text t = layout[i];
 
-        // textManager->loadText(word6);
-        // textManager->drawText(word6);
+            textManager->loadText(t);
+            textManager->drawText(t);
+        };
         
         window->presentNextFrame();
-            
-        // engineStatus = globals.getExecutionState();
-        
-        // if(engineStatus != LAZARUS_OK)
-        // {
-        //     std::cout << "Engine status: " << engineStatus << std::endl;
-        //     break;
-        // }
     };
 };
 

@@ -57,23 +57,22 @@ class Game
 
         Lazarus::MeshManager::Mesh *skull;
         // Lazarus::MeshManager::Mesh terrain;
-        Lazarus::MeshManager::Mesh *river;
+        Lazarus::MeshManager::Mesh river;
         Lazarus::MeshManager::Mesh *sword;
         Lazarus::MeshManager::Mesh *earth;
-        // Lazarus::MeshManager::Mesh metaball;
+        Lazarus::MeshManager::Mesh *metaball;
 
-        std::map<std::string, Lazarus::MeshManager::Mesh> glbAssets = {};
-        std::map<std::string, Lazarus::MeshManager::Mesh> wfAssets = {};
-
+        std::map<std::string, Lazarus::MeshManager::Mesh> assets = {};
+        std::vector<Lazarus::TextManager::Text> layout = {};
         uint32_t morpheusFont;
         uint32_t ubuntuFont;
 
-        Lazarus::TextManager::Text word1;
-        Lazarus::TextManager::Text word2;
-        Lazarus::TextManager::Text word3;
-        Lazarus::TextManager::Text word4;
-        Lazarus::TextManager::Text word5;
-        Lazarus::TextManager::Text word6;
+        Lazarus::TextManager::Text *title;
+        Lazarus::TextManager::Text *status_x;
+        Lazarus::TextManager::Text *status_y;
+        Lazarus::TextManager::Text *status_z;
+        Lazarus::TextManager::Text *frame_counter;
+        Lazarus::TextManager::Text *selection;
 
         uint32_t previousKey;
 };
