@@ -16,7 +16,7 @@ clang++ -std=c++17 main.cpp game.cpp -o run -lGL -lGLEW -lglfw -lfmod -llazarus 
 ```
 ### MSVC (Microsoft Visual Studio 2022):
 ```
-cl /EHsc /std:c++17 main.cpp game.cpp /link fmod_vc.lib freetype.lib glfw3.lib glew32.lib opengl32.lib liblazarus.lib msvcrt.lib user32.lib gdi32.lib shell32.lib /out:run.exe /NODEFAULTLIB:libcmt
+cl /EHsc /std:c++17 /Zc:__cplusplus main.cpp game.cpp /link fmod_vc.lib freetype.lib glfw3.lib glew32.lib opengl32.lib liblazarus.lib msvcrt.lib user32.lib gdi32.lib shell32.lib /out:run.exe /NODEFAULTLIB:libcmt
 ```
 4. Once compiled the game world can be launched like so:
 ```

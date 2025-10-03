@@ -12,60 +12,54 @@ class Game
         Game();
         void init();
         void loadAssets();
-        void layoutScene();
         void loadText();
         void start();
 
-    public:
+    private:
         void setupAudio();
-        void keyCapture(std::string key);
+        void keyCapture(uint32_t key);
 
-        int shaderProgram;
-        int errorCode;
-        int engineStatus;
+        uint32_t default_shader;
+        uint32_t caustics_shader;
+
+        lazarus_result engine_status;
 
         float moveX, moveZ;
         float turnX, turnY;
-        
-        const char** errorMessage;
+        float scale;
 
         Lazarus::GlobalsManager globals;
-        Lazarus::Shader shader;
-        Lazarus::Transform transformer;
+        Lazarus::Shader shader_manager;
+        Lazarus::Transform transform;
 
         unique_ptr<Lazarus::WindowManager> window;
-        unique_ptr<Lazarus::AudioManager> soundManager;
-        unique_ptr<Lazarus::TextManager> textManager;
-        unique_ptr<Lazarus::CameraManager> cameraBuilder;
-        unique_ptr<Lazarus::LightManager> lightBuilder;
+        unique_ptr<Lazarus::AudioManager> sound_manager;
+        unique_ptr<Lazarus::TextManager> text_manager;
+        unique_ptr<Lazarus::CameraManager> camera_builder;
+        unique_ptr<Lazarus::LightManager> light_builder;
 
-        unique_ptr<Lazarus::WorldFX> worldBuilder;
-        unique_ptr<Lazarus::MeshManager> meshBuilder;
+        unique_ptr<Lazarus::WorldFX> world_builder;
+        unique_ptr<Lazarus::MeshManager> mesh_builder;
+        unique_ptr<Lazarus::MeshManager> water_builder;
         
-        Lazarus::WorldFX::SkyBox skyBox;
+        Lazarus::WorldFX::Skybox skybox;
         Lazarus::WorldFX::Fog fog;
 
-        Lazarus::AudioManager::Audio springWaltz;
+        Lazarus::AudioManager::Audio spring_waltz;
 
         Lazarus::CameraManager::Camera camera;
-        Lazarus::LightManager::Light light1;
-        Lazarus::LightManager::Light light2;
+        Lazarus::LightManager::Light red_light;
+        Lazarus::LightManager::Light blue_light;
 
-        Lazarus::MeshManager::Mesh skull;
-        Lazarus::MeshManager::Mesh walls;
-        Lazarus::MeshManager::Mesh floors;
-        Lazarus::MeshManager::Mesh sword;
+        Lazarus::MeshManager::Mesh terrain;
+        Lazarus::MeshManager::Mesh river;
         Lazarus::MeshManager::Mesh earth;
-        Lazarus::MeshManager::Mesh metaball;
-        // Lazarus::MeshManager::Mesh monkey;
 
-        int32_t morpheusFont;
-        int32_t ubuntuFont;
+        uint32_t morpheus_font;
+        uint32_t ubuntu_font;
 
-        Lazarus::TextManager::Text word1;
-        Lazarus::TextManager::Text word2;
-        Lazarus::TextManager::Text word3;
-        Lazarus::TextManager::Text word4;
-        Lazarus::TextManager::Text word5;
-        Lazarus::TextManager::Text word6;
+        Lazarus::TextManager::Text title;
+        Lazarus::TextManager::Text frame_counter;
+
+        uint32_t previous_key;
 };
