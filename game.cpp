@@ -68,12 +68,14 @@ void Game::init()
     cameraBuilder       = std::make_unique<Lazarus::CameraManager>(default_shader);
 
     Lazarus::LightManager::LightConfig lightConfig = {};
+    lightConfig.type        = Lazarus::LightManager::LightType::POINT;
     lightConfig.position    = glm::vec3(10.0f, 10.0f, 1.0f);
     lightConfig.color       = glm::vec3(1.0f, 0.0f, 0.0f);
     lightConfig.brightness  = 10.0f;
     lightBuilder->createLightSource(light1, lightConfig);
 
     lightConfig = {};
+    lightConfig.type        = Lazarus::LightManager::LightType::POINT;
     lightConfig.position    = glm::vec3(-10.0f, 10.0f, -1.0f);
     lightConfig.color       = glm::vec3(0.0f, 0.0f, 1.0f);
     lightConfig.brightness  = 10.0f;
