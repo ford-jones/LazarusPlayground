@@ -7,7 +7,15 @@
     Tested Platforms:
     
     Asus Zenbook
-    - OS: Linux Ubuntu 22.04.5 LTS 
+    - OS: Linux Ubuntu 22.04.5 (Jammy)
+    - Graphical session: Gnome (wayland)
+    - Arch: x86_64
+    - CPU: Intel i7-10510U (8) @ 4.900GHz
+    - GPU: Intel CometLake-U GT2 [UHD Graphics]
+
+    Asus Zenbook:
+    - OS: Linux Debian 13.0 (Trixee)
+    - Graphical session: KDE-plasma (X11)
     - Arch: x86_64
     - CPU: Intel i7-10510U (8) @ 4.900GHz
     - GPU: Intel CometLake-U GT2 [UHD Graphics]

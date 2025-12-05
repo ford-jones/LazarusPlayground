@@ -38,7 +38,7 @@ Game::Game()
 
 void Game::init()
 {
-    globals.setLaunchInFullscreen(true);
+    // globals.setLaunchInFullscreen(true);
     globals.setVsyncDisabled(true);
     
     window = std::make_unique<Lazarus::WindowManager>("Lazarus Engine", 1000, 800);
@@ -71,12 +71,13 @@ void Game::init()
     lightConfig.position    = glm::vec3(10.0f, 10.0f, 1.0f);
     lightConfig.color       = glm::vec3(1.0f, 0.0f, 0.0f);
     lightConfig.brightness  = 10.0f;
+    lightConfig.type        = Lazarus::LightManager::LightType::POINT;
     lightBuilder->createLightSource(light1, lightConfig);
 
     lightConfig = {};
     lightConfig.position    = glm::vec3(-10.0f, 10.0f, -1.0f);
-    lightConfig.color       = glm::vec3(0.0f, 0.0f, 1.0f);
-    lightConfig.brightness  = 10.0f;
+    lightConfig.color       = glm::vec3(1.0f, 1.0f, 1.0f);
+    lightConfig.brightness  = 0.7f;
     lightBuilder->createLightSource(light2, lightConfig);
 
     Lazarus::CameraManager::CameraConfig cameraConfig = {};
