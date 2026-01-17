@@ -18,7 +18,7 @@ class Game
 
     public:
         void setupAudio();
-        void keyCapture(uint32_t key);
+        void keyCapture(int32_t key);
 
         uint32_t default_shader;
         uint32_t caustics_shader;
@@ -35,6 +35,8 @@ class Game
         Lazarus::GlobalsManager globals;
         Lazarus::Shader shader;
         Lazarus::Transform transformer;
+
+        Lazarus::WindowManager::Event event;
 
         unique_ptr<Lazarus::WindowManager> window;
         unique_ptr<Lazarus::AudioManager> soundManager;

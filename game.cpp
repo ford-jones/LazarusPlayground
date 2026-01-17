@@ -15,6 +15,7 @@ Game::Game()
     status_z        = nullptr;
     frame_counter   = nullptr;
     selection       = nullptr;
+    event = {};
     
     springWaltz = {};
     assets = {};
@@ -225,8 +226,13 @@ void Game::start()
         window->monitorFPS();
         window->monitorEvents();
         window->monitorPixelOccupants();
-        
-        this->keyCapture(window->keyCode);
+
+        for(size_t i = 0; i < window->eventQueue.size(); i++)
+        {
+            event = window->eventQueue[i];
+            this->keyCapture(event.key);
+        };
+        // this->keyCapture(event.key);
 
         shader.setActiveShader(default_shader);
 
@@ -272,7 +278,11 @@ void Game::start()
         
         /*text*/
         uint8_t occupant = 0;
-        cameraBuilder->getPixelOccupant(window->mousePositionX, window->mousePositionY, occupant);
+        int32_t mouseX = 0;
+        int32_t mouseY = 0;
+        
+        window->getLatestMouseMove(mouseX, mouseY);
+        cameraBuilder->getPixelOccupant(mouseX, mouseY, occupant);
         
         status_x->config.targetString       = std::string("Camera-X: ").append(std::to_string(camera.direction.x));
         status_y->config.targetString       = std::string("Camera-Y: ").append(std::to_string(camera.direction.y));
@@ -287,13 +297,14 @@ void Game::start()
             textManager->loadText(t);
             textManager->drawText(t);
         };
-        
+
         window->presentNextFrame();
     };
 };
 
-void Game::keyCapture(uint32_t key)
+void Game::keyCapture(int32_t key)
 {
+    std::cout << "CAPTURING" << std::endl;
     //  Key-bindings
     switch(key)
     {
@@ -315,19 +326,19 @@ void Game::keyCapture(uint32_t key)
             break;
         //  W / Look up
         case 87:
-            turnX += -1.0f;
+            turnX = -1.0f;
             break;
         //  A / Look left
         case 65:
-            turnY += -2.0f;
+            turnY = -2.0f;
             break;
         //  S / Look down
         case 83:
-            turnX += 2.0f;
+            turnX = 2.0f;
             break;
         //  D / Look right
         case 68:
-            turnY += 2.0f;
+            turnY = 2.0f;
             break;
         //  F / toggle fullscreen
         case 70:
@@ -345,6 +356,8 @@ void Game::keyCapture(uint32_t key)
         default:
             moveX = 0.0f;
 			moveZ = 0.0f;
+            turnX = 0.0f;
+            turnY = 0.0f;
             break;
     }
 
