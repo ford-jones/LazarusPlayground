@@ -106,10 +106,8 @@ void Game::loadAssets()
     std::filesystem::path assetDirectory = std::filesystem::current_path().append("assets");
     std::filesystem::path materialDirectory = assetDirectory.append("material");
     std::filesystem::path meshDirectory = assetDirectory.replace_filename("mesh/");
-    std::cout << meshDirectory << std::endl;
     for(auto &filename : std::filesystem::directory_iterator(meshDirectory.generic_string()))
     {
-        std::cout << filename.path().filename().string() << std::endl;
         files.push_back(filename);
     };
 
@@ -128,26 +126,19 @@ void Game::loadAssets()
         if(assetConfig.name == "river") continue;
         
         assetConfig.meshPath = meshes.append(p.filename().string());
-        std::cout << assetConfig.meshPath << std::endl;
         std::string ext = p.extension().string();
-        std::cout << "extension: " << ext << std::endl;
         if (strcmp(ext.c_str(), ".obj") == 0)
         {
-            std::cout << "go on then" << std::endl;
             assetConfig.materialPath = materials.append("/" + p.filename().replace_extension("mtl").string());
-            std::cout << assetConfig.materialPath << std::endl;
         };
-        std::cout << "so there arent objs anyway?" << std::endl;
         meshBuilder->create3DAsset(m, assetConfig);
         assets.insert(std::pair<std::string, Lazarus::MeshManager::Mesh>(assetConfig.name, m));
     };
 
-    std::cout << "made it this far" << std::endl;
     Lazarus::MeshManager::AssetConfig assetConfig = {};
     assetConfig.name = "river";
     assetConfig.meshPath = "assets/mesh/river.glb";
     waterBuilder->create3DAsset(river, assetConfig);
-    std::cout << "river must be okay" << std::endl;
     earth       = &assets["earth"];
     sword       = &assets["sword"];
     skull       = &assets["skull"];
@@ -312,7 +303,6 @@ void Game::start()
 
 void Game::keyCapture(int32_t key)
 {
-    std::cout << "CAPTURING" << std::endl;
     //  Key-bindings
     switch(key)
     {
