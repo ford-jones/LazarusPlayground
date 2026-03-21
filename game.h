@@ -45,8 +45,8 @@ class Game
         unique_ptr<Lazarus::LightManager> lightBuilder;
 
         unique_ptr<Lazarus::WorldFX> worldBuilder;
-        unique_ptr<Lazarus::MeshManager> meshBuilder;
-        unique_ptr<Lazarus::MeshManager> waterBuilder;
+        unique_ptr<Lazarus::ModelManager> meshBuilder;
+        unique_ptr<Lazarus::ModelManager> waterBuilder;
         
         Lazarus::WorldFX::Skybox skyBox;
         Lazarus::WorldFX::Fog fog;
@@ -57,14 +57,15 @@ class Game
         Lazarus::LightManager::Light light1;
         Lazarus::LightManager::Light light2;
 
-        Lazarus::MeshManager::Mesh *skull;
-        // Lazarus::MeshManager::Mesh terrain;
-        Lazarus::MeshManager::Mesh river;
-        Lazarus::MeshManager::Mesh *sword;
-        Lazarus::MeshManager::Mesh *earth;
-        Lazarus::MeshManager::Mesh *metaball;
+        Lazarus::ModelManager::Model river;
+        Lazarus::ModelManager::Model shapes;
+        Lazarus::ModelManager::Model *skull;
+        Lazarus::ModelManager::Model *sword;
+        Lazarus::ModelManager::Model *earth;
+        Lazarus::ModelManager::Model *metaball;
+        Lazarus::ModelManager::Model *warrior;
 
-        std::map<std::string, Lazarus::MeshManager::Mesh> assets = {};
+        std::map<std::string, Lazarus::ModelManager::Model> assets = {};
         std::vector<Lazarus::TextManager::Text> layout = {};
         uint32_t morpheusFont;
         uint32_t ubuntuFont;

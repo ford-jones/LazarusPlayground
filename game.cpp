@@ -20,9 +20,11 @@ Game::Game()
     springWaltz = {};
     assets = {};
 
+    skull    = nullptr;
     sword    = nullptr;
     earth    = nullptr;
     metaball = nullptr;
+    warrior  = nullptr;
 
     turnX = 0.0f;
     turnY = 0.0f;
@@ -39,8 +41,8 @@ Game::Game()
 
 void Game::init()
 {
-    // globals.setLaunchInFullscreen(true);
-    globals.setVsyncDisabled(true);
+    globals.setLaunchInFullscreen(true);
+    // globals.setVsyncDisabled(true);
     
     window = std::make_unique<Lazarus::WindowManager>("Lazarus Engine", 1000, 800);
     
@@ -62,8 +64,8 @@ void Game::init()
     shader.setActiveShader(default_shader);
 
     worldBuilder        = std::make_unique<Lazarus::WorldFX>(default_shader);
-    meshBuilder         = std::make_unique<Lazarus::MeshManager>(default_shader);
-    waterBuilder        = std::make_unique<Lazarus::MeshManager>(caustics_shader);
+    meshBuilder         = std::make_unique<Lazarus::ModelManager>(default_shader);
+    waterBuilder        = std::make_unique<Lazarus::ModelManager>(caustics_shader);
     textManager         = std::make_unique<Lazarus::TextManager>(default_shader);
     lightBuilder        = std::make_unique<Lazarus::LightManager>(default_shader);
     cameraBuilder       = std::make_unique<Lazarus::CameraManager>(default_shader);
@@ -96,7 +98,7 @@ void Game::loadAssets()
     auto start = std::chrono::system_clock::now();
 
     worldBuilder->createSkyBox(skyBox, "assets/images/skybox/pos_x.png", "assets/images/skybox/neg_x.png", "assets/images/skybox/neg_y.png", "assets/images/skybox/pos_y.png", "assets/images/skybox/pos_z.png", "assets/images/skybox/neg_z.png");
-    worldBuilder->createFog(fog, 5.0, 90.0f, 0.3f, glm::vec3(0.5f, 0.5f, 0.5f));
+    worldBuilder->createFog(fog, 8.0, 90.0f, 0.3f, glm::vec3(0.5f, 0.5f, 0.5f));
 
     shader.setActiveShader(default_shader);
 
@@ -115,15 +117,15 @@ void Game::loadAssets()
     {
         std::filesystem::path p = files[i].path();
         
-        Lazarus::MeshManager::Mesh m = {};
-        Lazarus::MeshManager::AssetConfig assetConfig = {};
+        Lazarus::ModelManager::Model m = {};
+        Lazarus::ModelManager::AssetConfig assetConfig = {};
 
         std::string meshes = meshDirectory.string();
         std::string materials = materialDirectory.string();
 
         assetConfig.name = p.filename().replace_extension("").string();
         
-        if(assetConfig.name == "river") continue;
+        if(assetConfig.name == "river" || assetConfig.name == "shapes") continue;
         
         assetConfig.meshPath = meshes.append(p.filename().string());
         std::string ext = p.extension().string();
@@ -132,17 +134,26 @@ void Game::loadAssets()
             assetConfig.materialPath = materials.append("/" + p.filename().replace_extension("mtl").string());
         };
         meshBuilder->create3DAsset(m, assetConfig);
-        assets.insert(std::pair<std::string, Lazarus::MeshManager::Mesh>(assetConfig.name, m));
+        assets.insert(std::pair<std::string, Lazarus::ModelManager::Model>(assetConfig.name, m));
     };
 
-    Lazarus::MeshManager::AssetConfig assetConfig = {};
+    Lazarus::ModelManager::AssetConfig assetConfig = {};
     assetConfig.name = "river";
     assetConfig.meshPath = "assets/mesh/river.glb";
     waterBuilder->create3DAsset(river, assetConfig);
+
+    assetConfig = {};
+    assetConfig.name = "shapes";
+    assetConfig.meshPath = "assets/mesh/shapes.glb";
+    assetConfig.instanceCount = 3;
+    assetConfig.selectable = true;
+    meshBuilder->create3DAsset(shapes, assetConfig);
+
     earth       = &assets["earth"];
     sword       = &assets["sword"];
     skull       = &assets["skull"];
     metaball    = &assets["metaball"];
+    warrior     = &assets["warrior"];
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_ms = (end - start);
@@ -194,14 +205,17 @@ void Game::loadText()
 
 void Game::layoutScene()
 {
-    transformer.translateCameraAsset(camera, 0.0f, 20.0f, 0.0f);
+    transformer.translateCamera(camera, 0.0f, 20.0f, 0.0f);
 
-    transformer.translateMeshAsset(*sword, 0.0f, 11.0f, 3.0f);
-    transformer.translateMeshAsset(*earth, 0.0f, 13.0f, 0.0f);
-    transformer.translateMeshAsset(*skull, 0.0f, 10.0f, 0.0f);
-    transformer.translateMeshAsset(*metaball, 20.0f, 30.0f, 0.0f);
+    transformer.translateModel(*sword, 0.0f, 11.0f, 3.0f);
+    transformer.translateModel(*earth, 0.0f, 13.0f, 0.0f);
+    transformer.translateModel(*skull, 0.0f, 10.0f, 0.0f);
+    transformer.translateModel(*metaball, 20.0f, 30.0f, 0.0f);
+    transformer.translateModel(*warrior, 0.0f, 11.5f, -10.0f);
+    transformer.translateModel(shapes, 10.0f, 0.0f, 0.0f, 1);
+    transformer.translateModel(shapes, -10.0f, 0.0f, 0.0f, 2);
 
-    transformer.scaleMeshAsset(*metaball, 6.0f, 6.0f, 6.0f);
+    transformer.scaleModel(*metaball, 6.0f, 6.0f, 6.0f);
 };
 
 void Game::setupAudio()
@@ -231,7 +245,6 @@ void Game::start()
             event = window->eventQueue[i];
             this->keyCapture(event.key);
         };
-        // this->keyCapture(event.key);
 
         shader.setActiveShader(default_shader);
 
@@ -241,8 +254,8 @@ void Game::start()
 
 		/*Camera*/
         cameraBuilder->loadCamera(camera);
-        transformer.rotateCameraAsset(camera, turnX, turnY, 0.0f);
-        transformer.translateCameraAsset(camera, moveX, 0.0f, moveZ);
+        transformer.rotateCamera(camera, turnX, turnY, 0.0f);
+        transformer.translateCamera(camera, moveX, 0.0f, moveZ);
         soundManager->updateListenerLocation(camera.position);
         
         /*sky*/
@@ -252,11 +265,14 @@ void Game::start()
 
         for(auto &i : assets)
         {
-            Lazarus::MeshManager::Mesh m = i.second;
+            Lazarus::ModelManager::Model m = i.second;
 
-            meshBuilder->loadMesh(m);
-            meshBuilder->drawMesh(m);
+            meshBuilder->loadModel(m);
+            meshBuilder->drawModel(m);
         };
+
+        meshBuilder->loadModel(shapes);
+        meshBuilder->drawModel(shapes);
 
         shader.setActiveShader(caustics_shader);
         shader.uploadUniform("time", &window->elapsedTime);
@@ -265,15 +281,17 @@ void Game::start()
         worldBuilder->loadFog(fog, caustics_shader);
 
         /*river*/
-        waterBuilder->loadMesh(river);
-        waterBuilder->drawMesh(river);
+        waterBuilder->loadModel(river);
+        waterBuilder->drawModel(river);
         
         shader.setActiveShader(default_shader);
-        transformer.translateMeshAsset(*sword, (0.5f / 10), 0.0f, 0.0f);
-        transformer.rotateMeshAsset(*sword, 0.0f, 1.0f, 0.0f);
-        transformer.rotateMeshAsset(*earth, 0.0f, -0.7f, 0.0f);
-        transformer.scaleMeshAsset(*skull, scale, scale, scale);
+        transformer.translateModel(*sword, (0.5f / 10), 0.0f, 0.0f);
+        transformer.rotateModel(*sword, 0.0f, 1.0f, 0.0f);
+        // transformer.translateModel(*warrior, 0.0f, 0.0f, (0.5f / 10));
+        transformer.rotateModel(*earth, 0.0f, -0.7f, 0.0f);
+        transformer.scaleModel(*skull, scale, scale, scale);
         
+        transformer.rotateModel(shapes, 0.0f, 1.0f, 0.0f, 1);
         
         /*text*/
         uint8_t occupant = 0;
@@ -289,13 +307,17 @@ void Game::start()
         frame_counter->config.targetString  = std::string("FPS: ").append(std::to_string(static_cast<int>(window->framesPerSecond)));
         selection->config.targetString      = std::string("Select ID: ").append(std::to_string(occupant));
 
-        for(size_t i = 0; i < layout.size(); i++)
-        {
-            Lazarus::TextManager::Text t = layout[i];
+        // for(size_t i = 0; i < layout.size(); i++)
+        // {
+            // Lazarus::TextManager::Text t = layout[i];
 
-            textManager->loadText(t);
-            textManager->drawText(t);
-        };
+            // textManager->loadText(t);
+            // textManager->drawText(t);
+        // };
+        Lazarus::TextManager::Text t = layout[4];
+
+        textManager->loadText(t);
+        textManager->drawText(t);
 
         window->presentNextFrame();
     };
@@ -303,6 +325,7 @@ void Game::start()
 
 void Game::keyCapture(int32_t key)
 {
+    std::cout << key << std::endl;
     //  Key-bindings
     switch(key)
     {
@@ -350,6 +373,15 @@ void Game::keyCapture(int32_t key)
         case 88:
             scale += 0.2f;
             break;
+        case 49:
+            meshBuilder->setActiveAnimation(*warrior, 0);
+            break;
+        case 50:
+            meshBuilder->setActiveAnimation(*warrior, 1);
+            break;
+        case 51:
+            meshBuilder->setToPosePosition(*warrior);
+            break;
         //  Reset
         default:
             moveX = 0.0f;
@@ -358,11 +390,6 @@ void Game::keyCapture(int32_t key)
             turnY = 0.0f;
             break;
     }
-
-    if(turnX > 360.0f || turnX < -360)
-    {
-        turnX = 0;
-    };
 
     previousKey = key;
 };

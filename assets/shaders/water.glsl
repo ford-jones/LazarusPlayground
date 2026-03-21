@@ -10,7 +10,7 @@ void main ()
 
     // Output to screen
     vec4 tuning = vec4(mix(cos(motion * 0.8).y, cos(motion * 0.4000001).y, sin(motion * 2.1411999).x)) * 2.8699999;
-    vec4 color = vec4(0.0, 0.3, 0.9, 0.1);
+    vec4 color = vec4(0.0, 0.7, 0.9, 0.1);
     vec4 oscilation = color * tuning;
 
     //  Process fog
