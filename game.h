@@ -61,9 +61,11 @@ class Game
         Lazarus::ModelManager::Model shapes;
         Lazarus::ModelManager::Model *skull;
         Lazarus::ModelManager::Model *sword;
+        Lazarus::ModelManager::Model *house;
         Lazarus::ModelManager::Model *earth;
         Lazarus::ModelManager::Model *metaball;
         Lazarus::ModelManager::Model *warrior;
+        Lazarus::ModelManager::Model *sparrow;
 
         std::map<std::string, Lazarus::ModelManager::Model> assets = {};
         std::vector<Lazarus::TextManager::Text> layout = {};

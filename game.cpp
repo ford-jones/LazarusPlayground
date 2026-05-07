@@ -22,9 +22,11 @@ Game::Game()
 
     skull    = nullptr;
     sword    = nullptr;
+    house    = nullptr;
     earth    = nullptr;
-    metaball = nullptr;
     warrior  = nullptr;
+    sparrow  = nullptr;
+    house    = nullptr;
 
     turnX = 0.0f;
     turnY = 0.0f;
@@ -41,14 +43,15 @@ Game::Game()
 
 void Game::init()
 {
-    globals.setLaunchInFullscreen(true);
+    // globals.setLaunchInFullscreen(true);
     // globals.setVsyncDisabled(true);
+    // globals.setWireframeMode(true);
     
     window = std::make_unique<Lazarus::WindowManager>("Lazarus Engine", 1000, 800);
     
     window->createWindow();
     window->eventsInit();
-    soundManager->initialise();
+    soundManager->initialise(); //  TODO: move this to constructor, annoying to have to init
 
     //  Create cursor prior to enforced image sanitisation
     window->createCursor(32, 32, 0, 0, "assets/images/crosshair.png");
@@ -71,21 +74,23 @@ void Game::init()
     cameraBuilder       = std::make_unique<Lazarus::CameraManager>(default_shader);
 
     Lazarus::LightManager::LightConfig lightConfig = {};
+    lightConfig.type        = Lazarus::LightManager::LightType::POINT;
     lightConfig.position    = glm::vec3(10.0f, 10.0f, 1.0f);
     lightConfig.color       = glm::vec3(1.0f, 0.0f, 0.0f);
     lightConfig.brightness  = 10.0f;
-    lightConfig.type        = Lazarus::LightManager::LightType::POINT;
     lightBuilder->createLightSource(light1, lightConfig);
 
     lightConfig = {};
+    lightConfig.type = Lazarus::LightManager::LightType::DIRECTIONAL;
     lightConfig.position    = glm::vec3(-10.0f, 10.0f, -1.0f);
     lightConfig.color       = glm::vec3(1.0f, 1.0f, 1.0f);
     lightConfig.brightness  = 0.7f;
     lightBuilder->createLightSource(light2, lightConfig);
 
     Lazarus::CameraManager::CameraConfig cameraConfig = {};
+    cameraConfig.type = Lazarus::CameraManager::CameraType::PERSPECTIVE_FLYING;
     cameraConfig.clippingDistance = 500.0f;
-    cameraBuilder->createPerspectiveCam(camera, cameraConfig);
+    cameraBuilder->createCamera(camera, cameraConfig);
 
     this->loadAssets();
     this->layoutScene();
@@ -152,8 +157,9 @@ void Game::loadAssets()
     earth       = &assets["earth"];
     sword       = &assets["sword"];
     skull       = &assets["skull"];
-    metaball    = &assets["metaball"];
     warrior     = &assets["warrior"];
+    sparrow     = &assets["bird"];
+    house       = &assets["house"];
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_ms = (end - start);
@@ -210,12 +216,18 @@ void Game::layoutScene()
     transformer.translateModel(*sword, 0.0f, 11.0f, 3.0f);
     transformer.translateModel(*earth, 0.0f, 13.0f, 0.0f);
     transformer.translateModel(*skull, 0.0f, 10.0f, 0.0f);
-    transformer.translateModel(*metaball, 20.0f, 30.0f, 0.0f);
     transformer.translateModel(*warrior, 0.0f, 11.5f, -10.0f);
+    transformer.translateModel(*sparrow, -8.0f, 14.5f, -60.0f);
+    transformer.translateModel(*house, 5.0f, 7.0f, -55.0f);
     transformer.translateModel(shapes, 10.0f, 0.0f, 0.0f, 1);
     transformer.translateModel(shapes, -10.0f, 0.0f, 0.0f, 2);
+    
+    transformer.scaleModel(*sparrow, 0.25f, 0.25f, 0.25f);
+    
+    transformer.rotateModel(*sparrow, 90.0f, 0.0f, 0.0f);
 
-    transformer.scaleModel(*metaball, 6.0f, 6.0f, 6.0f);
+    meshBuilder->setActiveAnimation(*sparrow, 0);
+    meshBuilder->setActiveAnimation(*warrior, 1);
 };
 
 void Game::setupAudio()
@@ -288,6 +300,7 @@ void Game::start()
         transformer.translateModel(*sword, (0.5f / 10), 0.0f, 0.0f);
         transformer.rotateModel(*sword, 0.0f, 1.0f, 0.0f);
         // transformer.translateModel(*warrior, 0.0f, 0.0f, (0.5f / 10));
+        transformer.translateModel(*sparrow, 0.0f, 0.5f, 0.0f);
         transformer.rotateModel(*earth, 0.0f, -0.7f, 0.0f);
         transformer.scaleModel(*skull, scale, scale, scale);
         
@@ -325,7 +338,6 @@ void Game::start()
 
 void Game::keyCapture(int32_t key)
 {
-    std::cout << key << std::endl;
     //  Key-bindings
     switch(key)
     {
@@ -374,14 +386,18 @@ void Game::keyCapture(int32_t key)
             scale += 0.2f;
             break;
         case 49:
-            meshBuilder->setActiveAnimation(*warrior, 0);
+            // meshBuilder->setActiveAnimation(*warrior, 0);
+            meshBuilder->pauseAnimation(*warrior);
             break;
         case 50:
-            meshBuilder->setActiveAnimation(*warrior, 1);
+            // meshBuilder->setActiveAnimation(*warrior, 1);
+            meshBuilder->playAnimation(*warrior);
             break;
-        case 51:
-            meshBuilder->setToPosePosition(*warrior);
-            break;
+        // case 51:
+        //     meshBuilder->pauseAnimation(*warrior);
+            // meshBuilder->setToPosePosition(*warrior);
+            // meshBuilder->playAnimation(*warrior);
+            // break;
         //  Reset
         default:
             moveX = 0.0f;
