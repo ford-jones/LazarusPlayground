@@ -163,8 +163,6 @@ void Game::loadAssets()
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_ms = (end - start);
-    std::cout << "\n" << std::endl;
-    std::cout << "Loaded Assets: " << elapsed_ms.count() << "ms" << std::endl;
 };
 
 void Game::loadText()
@@ -226,8 +224,8 @@ void Game::layoutScene()
     
     transformer.rotateModel(*sparrow, 90.0f, 0.0f, 0.0f);
 
-    meshBuilder->setActiveAnimation(*sparrow, 0);
-    meshBuilder->setActiveAnimation(*warrior, 1);
+    meshBuilder->setActiveAnimation(*sparrow, 0, -1);
+    meshBuilder->setActiveAnimation(*warrior, 1, -1);
 };
 
 void Game::setupAudio()
@@ -261,7 +259,7 @@ void Game::start()
         shader.setActiveShader(default_shader);
 
         /*Light*/
-        lightBuilder->loadLightSource(light1);
+        // lightBuilder->loadLightSource(light1);
         lightBuilder->loadLightSource(light2);
 
 		/*Camera*/
@@ -386,18 +384,14 @@ void Game::keyCapture(int32_t key)
             scale += 0.2f;
             break;
         case 49:
-            // meshBuilder->setActiveAnimation(*warrior, 0);
             meshBuilder->pauseAnimation(*warrior);
             break;
         case 50:
-            // meshBuilder->setActiveAnimation(*warrior, 1);
             meshBuilder->playAnimation(*warrior);
             break;
-        // case 51:
-        //     meshBuilder->pauseAnimation(*warrior);
-            // meshBuilder->setToPosePosition(*warrior);
-            // meshBuilder->playAnimation(*warrior);
-            // break;
+        case 51:
+            meshBuilder->setToPosePosition(*warrior);
+            break;
         //  Reset
         default:
             moveX = 0.0f;
