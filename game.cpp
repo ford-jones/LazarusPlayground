@@ -66,12 +66,12 @@ void Game::init()
 
     shader.setActiveShader(default_shader);
 
-    worldBuilder        = std::make_unique<Lazarus::WorldFX>(default_shader);
-    meshBuilder         = std::make_unique<Lazarus::ModelManager>(default_shader);
-    waterBuilder        = std::make_unique<Lazarus::ModelManager>(caustics_shader);
-    textManager         = std::make_unique<Lazarus::TextManager>(default_shader);
-    lightBuilder        = std::make_unique<Lazarus::LightManager>(default_shader);
-    cameraBuilder       = std::make_unique<Lazarus::CameraManager>(default_shader);
+    worldBuilder        = std::make_unique<Lazarus::WorldFX>(shader);
+    meshBuilder         = std::make_unique<Lazarus::ModelManager>(shader);
+    waterBuilder        = std::make_unique<Lazarus::ModelManager>(shader);
+    textManager         = std::make_unique<Lazarus::TextManager>(shader);
+    lightBuilder        = std::make_unique<Lazarus::LightManager>(shader);
+    cameraBuilder       = std::make_unique<Lazarus::CameraManager>(shader);
 
     Lazarus::LightManager::LightConfig lightConfig = {};
     lightConfig.type        = Lazarus::LightManager::LightType::POINT;
@@ -288,7 +288,7 @@ void Game::start()
         shader.uploadUniform("time", &window->elapsedTime);
         
         cameraBuilder->loadCamera(camera);
-        worldBuilder->loadFog(fog, caustics_shader);
+        worldBuilder->loadFog(fog);
 
         /*river*/
         waterBuilder->loadModel(river);
