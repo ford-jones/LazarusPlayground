@@ -18,6 +18,10 @@ clang++ -std=c++17 main.cpp game.cpp -o run -lGL -lGLEW -lglfw -lfmod -llazarus 
 ```
 cl /EHsc /std:c++17 /Zc:__cplusplus main.cpp game.cpp /link fmod_vc.lib freetype.lib glfw3.lib glew32.lib opengl32.lib liblazarus.lib msvcrt.lib user32.lib gdi32.lib shell32.lib /out:run.exe /NODEFAULTLIB:libcmt
 ```
+### g++ Apple Silicon M2:
+```
+ g++ -std=c++17 -L/usr/local/lib -I/usr/local/include main.cpp game.cpp -O3 -o run -lGLEW -lglfw3 -lfmod -lfreetype -llazarus -framework OpenGL -framework Cocoa -framework IOKit g++ -std=c++17 -L/usr/local/lib -I/usr/local/include main.cpp game.cpp -O3 -o run -lGLEW -lglfw3 -lfmod -lfreetype -llazarus -framework OpenGL -framework Cocoa -framework IOKit
+ 
 4. Once compiled the game world can be launched like so:
 ```
 ./run
