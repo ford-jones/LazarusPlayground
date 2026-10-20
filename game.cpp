@@ -20,10 +20,10 @@ Game::Game()
     springWaltz = {};
     assets = {};
 
-    skull    = nullptr;
+    // skull    = nullptr;
     sword    = nullptr;
     house    = nullptr;
-    earth    = nullptr;
+    // earth    = nullptr;
     warrior  = nullptr;
     sparrow  = nullptr;
     house    = nullptr;
@@ -34,11 +34,17 @@ Game::Game()
     moveZ = 0.0f;
     scale = 1.0f;
 
+    fire = {};
+    smoke = {};
     skyBox = {};
     fog = {};
 
     this->morpheusFont = 0;
     this->ubuntuFont = 0;
+
+    this->default_shader = 0;
+    this->caustics_shader = 0;
+    this->fire_shader = 0;
 };
 
 void Game::init()
@@ -47,9 +53,17 @@ void Game::init()
     // globals.setVsyncDisabled(true);
     // globals.setWireframeMode(true);
     
-    window = std::make_unique<Lazarus::WindowManager>("Lazarus Engine", 1000, 800);
+    window = std::make_unique<Lazarus::WindowManager>();
     
-    window->createWindow();
+    WindowManager::WindowConfig cfg = {};
+    cfg.title = "Lazarus Engine";
+    cfg.width = 1000;
+    cfg.height = 800;
+    cfg.disableVsync = false;
+    // cfg.fullscreen = true;
+    window->create(cfg);
+    window->snapCursor(100, 100);
+
     window->eventsInit();
     soundManager->initialise(); //  TODO: move this to constructor, annoying to have to init
 
@@ -59,14 +73,13 @@ void Game::init()
     globals.setEnforceImageSanity(true);
     globals.setMaxImageSize(500, 500);
     
-    window->loadConfig();
+    // window->loadConfig();
 
     shader.compileShaders(default_shader);
     shader.compileShaders(caustics_shader, "assets/shaders/water.glsl");
-
+    shader.compileShaders(fire_shader, "assets/shaders/fire.glsl");
     shader.setActiveShader(default_shader);
-
-    worldBuilder        = std::make_unique<Lazarus::WorldFX>(shader);
+    
     meshBuilder         = std::make_unique<Lazarus::ModelManager>(shader);
     waterBuilder        = std::make_unique<Lazarus::ModelManager>(shader);
     textManager         = std::make_unique<Lazarus::TextManager>(shader);
@@ -75,14 +88,15 @@ void Game::init()
 
     Lazarus::LightManager::LightConfig lightConfig = {};
     lightConfig.type        = Lazarus::LightManager::LightType::POINT;
-    lightConfig.position    = glm::vec3(10.0f, 10.0f, 1.0f);
-    lightConfig.color       = glm::vec3(1.0f, 0.0f, 0.0f);
-    lightConfig.brightness  = 10.0f;
+    lightConfig.position    = glm::vec3(0.0f, 12.0f, 0.0f);
+    lightConfig.color       = glm::vec3(1.0f, 0.2f, 0.0f);
+    lightConfig.brightness  = 5.0f;
     lightBuilder->createLightSource(light1, lightConfig);
 
     lightConfig = {};
-    lightConfig.type = Lazarus::LightManager::LightType::DIRECTIONAL;
-    lightConfig.position    = glm::vec3(-10.0f, 10.0f, -1.0f);
+    // lightConfig.type = Lazarus::LightManager::LightType::DIRECTIONAL;
+    lightConfig.type = Lazarus::LightManager::LightType::AMBIENT;
+    // lightConfig.position    = glm::vec3(-10.0f, 10.0f, -1.0f);
     lightConfig.color       = glm::vec3(1.0f, 1.0f, 1.0f);
     lightConfig.brightness  = 0.7f;
     lightBuilder->createLightSource(light2, lightConfig);
@@ -91,8 +105,39 @@ void Game::init()
     cameraConfig.type = Lazarus::CameraManager::CameraType::PERSPECTIVE_FLYING;
     cameraConfig.clippingDistance = 500.0f;
     cameraBuilder->createCamera(camera, cameraConfig);
-
+    
     this->loadAssets();
+    worldBuilder = std::make_unique<Lazarus::WorldFX>(shader, camera);
+    
+    Lazarus::WorldFX::ParticleSystemConfig particleConfig = {};
+    particleConfig.baseAsset = "assets/particle.png";
+    particleConfig.particleCount = 80;
+    particleConfig.decay = 2.0f;
+    particleConfig.spawnRate = 100;
+    particleConfig.epicenter = glm::vec3(0.0f, 10.0f, 0.0f);
+    particleConfig.minVelocity = glm::vec3(-0.05f, 0.05f, -0.05f);
+    particleConfig.maxVelocity = glm::vec3(0.05f, 0.1f, 0.05f);
+    particleConfig.maxOffset = 20.0f;
+    particleConfig.particleSize = 5.0f;
+    particleConfig.dispersion = 0.5f;
+    worldBuilder->createParticles(smoke, particleConfig);
+
+    particleConfig = {};
+    particleConfig.baseAsset = "assets/particle.png";
+    particleConfig.particleCount = 130;
+    particleConfig.decay = 0.6f;
+    particleConfig.spawnRate = 20;
+    particleConfig.epicenter = glm::vec3(0.0f, 10.0f, 0.0f);
+    particleConfig.minVelocity = glm::vec3(-0.02f, 0.1f, -0.02f);
+    particleConfig.maxVelocity = glm::vec3(0.02f, 0.2f, 0.02f);
+    particleConfig.maxOffset = 8.0f;
+    particleConfig.particleSize = 2.0f;
+    particleConfig.dispersion = 0.5f;
+    worldBuilder->createParticles(fire, particleConfig);
+
+    worldBuilder->createSkyBox(skyBox, "assets/images/skybox/pos_x.png", "assets/images/skybox/neg_x.png", "assets/images/skybox/neg_y.png", "assets/images/skybox/pos_y.png", "assets/images/skybox/pos_z.png", "assets/images/skybox/neg_z.png");
+    worldBuilder->createFog(fog, 20.0, 90.0f, 0.1f, glm::vec3(0.05f, 0.1f, 0.3f));
+
     this->layoutScene();
     this->setupAudio();
     this->loadText();
@@ -101,9 +146,6 @@ void Game::init()
 void Game::loadAssets()
 {
     auto start = std::chrono::system_clock::now();
-
-    worldBuilder->createSkyBox(skyBox, "assets/images/skybox/pos_x.png", "assets/images/skybox/neg_x.png", "assets/images/skybox/neg_y.png", "assets/images/skybox/pos_y.png", "assets/images/skybox/pos_z.png", "assets/images/skybox/neg_z.png");
-    worldBuilder->createFog(fog, 8.0, 90.0f, 0.3f, glm::vec3(0.5f, 0.5f, 0.5f));
 
     shader.setActiveShader(default_shader);
 
@@ -154,9 +196,9 @@ void Game::loadAssets()
     assetConfig.selectable = true;
     meshBuilder->create3DAsset(shapes, assetConfig);
 
-    earth       = &assets["earth"];
+    // earth       = &assets["earth"];
     sword       = &assets["sword"];
-    skull       = &assets["skull"];
+    // skull       = &assets["skull"];
     warrior     = &assets["warrior"];
     sparrow     = &assets["bird"];
     house       = &assets["house"];
@@ -177,6 +219,7 @@ void Game::loadText()
 
     std::vector<std::string> targetStrings = {
         "Lazarus Engine", "Camera-X: ", "Camera-Y: ", "Camera-Z: ", "FPS: ", "Select-ID: "
+        // "Lazarus Engine", "FPS: ", "Select-ID: "
     };
 
     for(uint8_t i = 0; i < targetStrings.size(); i ++)
@@ -200,6 +243,8 @@ void Game::loadText()
     status_z        = &layout[3];
     frame_counter   = &layout[4];
     selection       = &layout[5];
+    // frame_counter   = &layout[1];
+    // selection       = &layout[2];
 
     title->config.fontIndex = this->morpheusFont;
     title->config.color = glm::vec3(0.6f, 0.0f, 0.0f);
@@ -212,8 +257,8 @@ void Game::layoutScene()
     transformer.translateCamera(camera, 0.0f, 20.0f, 0.0f);
 
     transformer.translateModel(*sword, 0.0f, 11.0f, 3.0f);
-    transformer.translateModel(*earth, 0.0f, 13.0f, 0.0f);
-    transformer.translateModel(*skull, 0.0f, 10.0f, 0.0f);
+    // transformer.translateModel(*earth, 0.0f, 13.0f, 0.0f);
+    // transformer.translateModel(*skull, 0.0f, 10.0f, 0.0f);
     transformer.translateModel(*warrior, 0.0f, 11.5f, -10.0f);
     transformer.translateModel(*sparrow, -8.0f, 14.5f, -60.0f);
     transformer.translateModel(*house, 5.0f, 7.0f, -55.0f);
@@ -237,7 +282,7 @@ void Game::setupAudio()
 
     soundManager->createAudio(springWaltz, audioConfig);
     soundManager->loadAudio(springWaltz);
-    soundManager->playAudio(springWaltz); 
+    // soundManager->playAudio(springWaltz); 
 };
 
 void Game::start()
@@ -246,20 +291,24 @@ void Game::start()
     
     while(window->isOpen)
     {
-        window->monitorFPS();
+        // window->monitorFPS();
+        // window->monitorTimeDelta();
+        window->monitorFrameDelta();
+        // window->monitorElapsedUptime();
         window->monitorEvents();
         window->monitorPixelOccupants();
 
         for(size_t i = 0; i < window->eventQueue.size(); i++)
         {
             event = window->eventQueue[i];
-            this->keyCapture(event.key);
+            int32_t code = event.type != Lazarus::WindowManager::EventType::KEY_UP ? event.key : 0;
+            this->keyCapture(code);
         };
 
         shader.setActiveShader(default_shader);
 
         /*Light*/
-        // lightBuilder->loadLightSource(light1);
+        lightBuilder->loadLightSource(light1);
         lightBuilder->loadLightSource(light2);
 
 		/*Camera*/
@@ -270,8 +319,8 @@ void Game::start()
         
         /*sky*/
         fog.viewpoint = camera.position;
-        worldBuilder->loadFog(fog);
-        worldBuilder->drawSkyBox(skyBox, camera);
+        worldBuilder->drawFog(fog);
+        worldBuilder->drawSkyBox(skyBox);
 
         for(auto &i : assets)
         {
@@ -284,11 +333,20 @@ void Game::start()
         meshBuilder->loadModel(shapes);
         meshBuilder->drawModel(shapes);
 
+        shader.setActiveShader(fire_shader);
+        cameraBuilder->loadCamera(camera);
+        worldBuilder->drawParticles(fire);
+        
+        shader.setActiveShader(default_shader);
+        cameraBuilder->loadCamera(camera);
+        worldBuilder->drawParticles(smoke);
+
+        float tim = LAZARUS_UPTIME / 1000.0f;
         shader.setActiveShader(caustics_shader);
-        shader.uploadUniform("time", &window->elapsedTime);
+        shader.uploadUniform("time", &tim);
         
         cameraBuilder->loadCamera(camera);
-        worldBuilder->loadFog(fog);
+        worldBuilder->drawFog(fog);
 
         /*river*/
         waterBuilder->loadModel(river);
@@ -298,9 +356,9 @@ void Game::start()
         transformer.translateModel(*sword, (0.5f / 10), 0.0f, 0.0f);
         transformer.rotateModel(*sword, 0.0f, 1.0f, 0.0f);
         // transformer.translateModel(*warrior, 0.0f, 0.0f, (0.5f / 10));
-        transformer.translateModel(*sparrow, 0.0f, 0.5f, 0.0f);
-        transformer.rotateModel(*earth, 0.0f, -0.7f, 0.0f);
-        transformer.scaleModel(*skull, scale, scale, scale);
+        transformer.translateModel(*sparrow, 0.0f, 0.1f, 0.0f);
+        // transformer.rotateModel(*earth, 0.0f, -0.7f, 0.0f);
+        // transformer.scaleModel(*skull, scale, scale, scale);
         
         transformer.rotateModel(shapes, 0.0f, 1.0f, 0.0f, 1);
         
@@ -312,23 +370,25 @@ void Game::start()
         window->getLatestMouseMove(mouseX, mouseY);
         cameraBuilder->getPixelOccupant(mouseX, mouseY, occupant);
         
-        status_x->config.targetString       = std::string("Camera-X: ").append(std::to_string(camera.direction.x));
-        status_y->config.targetString       = std::string("Camera-Y: ").append(std::to_string(camera.direction.y));
-        status_z->config.targetString       = std::string("Camera-Z: ").append(std::to_string(camera.direction.z));
+        status_x->config.targetString       = std::string("Camera-X: ").append(std::to_string(camera.rotation.x));
+        status_y->config.targetString       = std::string("Camera-Y: ").append(std::to_string(camera.rotation.y));
+        status_z->config.targetString       = std::string("Camera-Z: ").append(std::to_string(camera.rotation.z));
         frame_counter->config.targetString  = std::string("FPS: ").append(std::to_string(static_cast<int>(window->framesPerSecond)));
-        selection->config.targetString      = std::string("Select ID: ").append(std::to_string(occupant));
+        // frame_counter->config.targetString  = std::string("TIME: ").append(std::to_string(static_cast<int>(LAZARUS_UPTIME)));
+        // selection->config.targetString      = std::string("Select ID: ").append(std::to_string(occupant));
+        selection->config.targetString      = std::string("TIME: ").append(std::to_string(static_cast<int>(LAZARUS_UPTIME)));
 
-        // for(size_t i = 0; i < layout.size(); i++)
-        // {
-            // Lazarus::TextManager::Text t = layout[i];
+        for(size_t i = 0; i < layout.size(); i++)
+        {
+            Lazarus::TextManager::Text t = layout[i];
 
-            // textManager->loadText(t);
-            // textManager->drawText(t);
-        // };
-        Lazarus::TextManager::Text t = layout[4];
+            textManager->loadText(t);
+            textManager->drawText(t);
+        };
+        // Lazarus::TextManager::Text t = layout[4];
 
-        textManager->loadText(t);
-        textManager->drawText(t);
+        // textManager->loadText(t);
+        // textManager->drawText(t);
 
         window->presentNextFrame();
     };

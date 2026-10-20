@@ -22,6 +22,7 @@ class Game
 
         uint32_t default_shader;
         uint32_t caustics_shader;
+        uint32_t fire_shader;
 
         int errorCode;
         int engineStatus;
@@ -50,6 +51,8 @@ class Game
         
         Lazarus::WorldFX::Skybox skyBox;
         Lazarus::WorldFX::Fog fog;
+        Lazarus::WorldFX::ParticleSystem fire;
+        Lazarus::WorldFX::ParticleSystem smoke;
 
         Lazarus::AudioManager::Audio springWaltz;
 
@@ -59,10 +62,10 @@ class Game
 
         Lazarus::ModelManager::Model river;
         Lazarus::ModelManager::Model shapes;
-        Lazarus::ModelManager::Model *skull;
+        // Lazarus::ModelManager::Model *skull;
         Lazarus::ModelManager::Model *sword;
         Lazarus::ModelManager::Model *house;
-        Lazarus::ModelManager::Model *earth;
+        // Lazarus::ModelManager::Model *earth;
         Lazarus::ModelManager::Model *metaball;
         Lazarus::ModelManager::Model *warrior;
         Lazarus::ModelManager::Model *sparrow;

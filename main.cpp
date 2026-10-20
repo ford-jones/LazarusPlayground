@@ -8,19 +8,19 @@
     
     MSI GF65
     - OS: Windows 11
-    - Arch: x86
+    - Arch: amd64
     - CPU: Intel 10th Gen Core i5-10400H 4-Core 2.6 – 4.6GHz
     - GPU: NVIDIA GeForce GTX 1650
 
     MSI Prestige 15
     - OS: Windows 10
-    - Arch: x86
+    - Arch: x64
     - CPU: Intel Core i7-10710U @ 1.10GHz
     - GPU: Intel UHD Graphics
     
     Dell Optiplex 9020                              (verify these specs)
     - OS: Windows 10
-    - Arch: x86
+    - Arch: x64
     - CPU: Intel 4th Gen Core i7 3.4ghz
     - GPU: AMD Radeon RX 590
     
